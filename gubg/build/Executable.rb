@@ -7,7 +7,7 @@ module Build
     class Executable
         include Rake::DSL
         @@re_cpp = /\.cpp$/
-        @@re_hpp = /\.hpp$/
+        @@re_hpp = /\.(hpp|h)$/
         @@re_sep = /[\.\\\/]/
         @@ext_obj = '.obj'
         def initialize(exe_fn, na = {compiler: nil})
@@ -17,10 +17,16 @@ module Build
                             when NilClass, :gcc then GCC
                             else na[:compiler] end
             @compiler = compiler_type.new
+            @object_dir = Dir.pwd
         end
 
         def exe_filename()
             @exe_fn
+        end
+
+        def set_object_dir(dir)
+            @object_dir = dir
+            mkdir_p(@object_dir) unless File.exist?(@object_dir)
         end
 
         def add_sources(sources)
@@ -124,7 +130,7 @@ module Build
             @filenames_per_type[:hpp]
         end
         def object_fn_(source)
-            source.gsub(@@re_sep, '_')+@@ext_obj
+            File.join(@object_dir, source.gsub(@@re_sep, '_')+@@ext_obj)
         end
         def object_fns_
             source_fns_.map{|fn|object_fn_(fn)}
