@@ -1,4 +1,5 @@
 require('gubg/build/GCC.rb')
+require('gubg/build/MSVC.rb')
 require('gubg/build/FilePool.rb')
 require('gubg/build/IncludeParser.rb')
 require('set')
@@ -15,6 +16,7 @@ module Build
             @filenames_per_type = Hash.new{|h,k|h[k] = []}
             compiler_type = case na[:compiler]
                             when NilClass, :gcc then GCC
+                            when :msvc then MSVC
                             else na[:compiler] end
             @compiler = compiler_type.new
             @object_dir = Dir.pwd
@@ -31,6 +33,7 @@ module Build
 
         def add_sources(sources)
             expand_(sources).each do |fn|
+                #puts("Adding #{fn}")
                 case fn
                 when @@re_cpp then @filenames_per_type[:cpp] << fn
                 when @@re_hpp then @filenames_per_type[:hpp] << fn
@@ -38,8 +41,35 @@ module Build
                 end
             end
         end
-        def add_include_path(path)
-            @compiler.add_include_path(path)
+        def add_include_path(*paths)
+            [paths].flatten.each do |path|
+                @compiler.add_include_path(path)
+            end
+        end
+        def add_defines(defines)
+            [defines].flatten.each do |define|
+                @compiler.add_define(define)
+            end
+        end
+        def add_force_include(*fns)
+            [fns].flatten.each do |fn|
+                @compiler.add_force_include(fn)
+            end
+        end
+        def add_library_path(*paths)
+            [paths].flatten.each do |path|
+                @compiler.add_library_path(path)
+            end
+        end
+        def add_library(*libs)
+            [libs].flatten.each do |lib|
+                @compiler.add_library(lib)
+            end
+        end
+        def add_option(*options)
+            [options].flatten.each do |option|
+                @compiler.add_option(option)
+            end
         end
 
         def create_rules
@@ -52,6 +82,7 @@ module Build
             include_parser = IncludeParser.new
 
             source_fns_.each do |source|
+                #puts("Adding compile rule for #{source}")
 
                 #Determine the dependencies for source
                 dependencies = Set.new
@@ -74,7 +105,7 @@ module Build
                     sh @compiler.compile_command(object, source)
                 end
             end
-            object_fns = object_fns_()
+            object_fns = object_fns_
             file @exe_fn => object_fns do
                 sh @compiler.link_command(@exe_fn, object_fns)
             end
@@ -100,6 +131,7 @@ module Build
             Rake::Task[@exe_fn].invoke()
         end
         def run
+            build
             sh "./#{@exe_fn}"
         end
 
