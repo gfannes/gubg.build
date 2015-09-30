@@ -5,6 +5,7 @@ module GUBG
         raise('ERROR: You have to specify the shared destination dir via the environment vairable "gubg"') unless ENV.has_key?('gubg')
         File.join(ENV['gubg'], *parts.compact)
     end
+    #Makes sure we can "include GUBG" to call shared() directly
     def shared(*parts)
         GUBG::shared(*parts)
     end
