@@ -1,7 +1,6 @@
-shared_fn = File.join(ENV['gubg'], 'shared.rb')
-if File.exist?(shared_fn)
-    require(shared_fn)
-else
+begin
+    require(File.join(ENV['gubg'], 'shared.rb'))
+rescue LoadError
     puts("Bootstrapping \"shared.rb\"")
     require('./shared.rb')
     GUBG::publish('./', 'shared.rb')
