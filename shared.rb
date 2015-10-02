@@ -53,14 +53,14 @@ module GUBG
         GUBG::link_unless_exists(old, new)
     end
 
-    def self.git_clone(uri, name)
+    def self.git_clone(uri, name, &block)
         if not File.exist?(name)
             Rake.sh("git clone #{uri}/#{name}")
             Dir.chdir(name) {yield} if block_given?
         end
     end
-    def git_clone(uri, name)
-        GUBG::git_clone(uri, name)
+    def git_clone(uri, name, &block)
+        GUBG::git_clone(uri, name, &block)
     end
 end
 
