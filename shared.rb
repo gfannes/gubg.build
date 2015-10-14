@@ -47,7 +47,7 @@ module GUBG
     end
 
     def self.link_unless_exists(old, new)
-        ln_s(old, new) unless (File.exist?(new) or File.symlink?(new))
+        FileUtils.ln_s(old, new) unless (File.exist?(new) or File.symlink?(new))
     end
     def link_unless_exists(old, new)
         GUBG::link_unless_exists(old, new)
