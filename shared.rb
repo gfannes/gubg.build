@@ -62,6 +62,16 @@ module GUBG
     def git_clone(uri, name, &block)
         GUBG::git_clone(uri, name, &block)
     end
+
+    def self.os()
+	    case RUBY_PLATFORM
+	    when /mingw/ then :windows
+	    else :linux
+	    end
+    end
+    def os()
+	    GUBG::os()
+    end
 end
 
 $LOAD_PATH << GUBG::shared('ruby')
