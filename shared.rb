@@ -33,11 +33,15 @@ module GUBG
         Dir.chdir(src) do
             FileList.new(pattern).each do |fn|
                 dst_fn = File.join(dst, fn)
-                dst_dir = File.dirname(dst_fn)
-                FileUtils.mkdir_p(dst_dir) unless File.exist?(dst_dir)
-                if (!File.exist?(dst_fn) or !FileUtils.identical?(fn, dst_fn))
-                    puts("Installing \"#{fn}\" to \"#{dst_fn}\"")
-                    FileUtils.install(fn, dst_dir, mode: na[:mode])
+                if File.directory?(fn)
+                    puts("\"#{fn}\" is a directory, I will not publish this.") unless File.exist?(dst_fn)
+                else
+                    dst_dir = File.dirname(dst_fn)
+                    FileUtils.mkdir_p(dst_dir) unless File.exist?(dst_dir)
+                    if (!File.exist?(dst_fn) or !FileUtils.identical?(fn, dst_fn))
+                        puts("Installing \"#{fn}\" to \"#{dst_fn}\"")
+                        FileUtils.install(fn, dst_dir, mode: na[:mode])
+                    end
                 end
             end
         end
@@ -56,8 +60,8 @@ module GUBG
     def self.git_clone(uri, name, &block)
         if not File.exist?(name)
             Rake.sh("git clone #{uri}/#{name}")
-            Dir.chdir(name) {yield} if block_given?
         end
+        Dir.chdir(name) {yield} if block_given?
     end
     def git_clone(uri, name, &block)
         GUBG::git_clone(uri, name, &block)
