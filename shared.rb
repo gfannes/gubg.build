@@ -28,11 +28,12 @@ module GUBG
         GUBG::shared_dir(*parts)
     end
 
-    def self.publish(src, pattern, na = {dst: nil, mode: nil})
+    def self.publish(src, pattern, na = {dst: nil, mode: nil}, &block)
         dst = shared(na[:dst])
         Dir.chdir(src) do
             FileList.new(pattern).each do |fn|
                 dst_fn = File.join(dst, fn)
+                dst_fn = yield(dst_fn) if block_given?
                 if File.directory?(fn)
                     puts("\"#{fn}\" is a directory, I will not publish this.") unless File.exist?(dst_fn)
                 else
@@ -46,8 +47,8 @@ module GUBG
             end
         end
     end
-    def publish(src, pattern, na = {})
-        GUBG::publish(src, pattern, na)
+    def publish(src, pattern, na = {}, &block)
+        GUBG::publish(src, pattern, na, &block)
     end
 
     def self.link_unless_exists(old, new)

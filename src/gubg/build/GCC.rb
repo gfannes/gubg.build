@@ -8,7 +8,10 @@ module Build
             "g++ -std=c++11 -c #{source} -o #{object} #{include_paths_cmd} #{defines_cmd}"
         end
         def link_command(exe, objects)
-            "g++ -o #{exe} #{objects*' '} #{lib_cli}"
+            "g++ -o #{exe} #{objects*' '} #{lib_sp_cli} #{lib_cli}"
+        end
+        def lib_sp_cli()
+            @library_paths.flatten.map{|path|"-L#{path}"}*' '
         end
         def lib_cli()
             @libraries.flatten.map{|lib|"-l#{lib}"}*' '
