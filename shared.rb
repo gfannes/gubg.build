@@ -66,11 +66,24 @@ module GUBG
     def self.os()
 	    case RUBY_PLATFORM
 	    when /mingw/ then :windows
+	    when /darwin/ then :osx
 	    else :linux
 	    end
     end
     def os()
 	    GUBG::os()
+    end
+
+    def self.which(program)
+	path = case os
+		when :linux, :osx then `which #{program}`
+		when :windows then `where #{program}`
+		else raise("Unknown os #{os}") end
+	path.chomp!
+	path.empty? ? nil : path
+    end
+    def which(program)
+	    GUBG::which(program)
     end
 end
 
