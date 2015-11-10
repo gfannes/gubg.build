@@ -1,4 +1,5 @@
 require('fileutils')
+require('digest/md5')
 
 module GUBG
     def self.shared(*parts)
@@ -28,20 +29,28 @@ module GUBG
         GUBG::shared_dir(*parts)
     end
 
+    def self.md5sum(fn)
+        Digest::MD5.hexdigest(File.open(fn, 'rb'){|fi|fi.read})
+    end
+    def md5sum(fn)
+        GUBG::md5sum(fn)
+    end
+
     def self.publish(src, pattern, na = {dst: nil, mode: nil}, &block)
         dst = shared(na[:dst])
         Dir.chdir(src) do
             FileList.new(pattern).each do |fn|
                 dst_fn = File.join(dst, fn)
-                dst_fn = yield(dst_fn) if block_given?
+                new_fn = (block_given? ? yield(dst_fn) : dst_fn)
                 if File.directory?(fn)
                     puts("\"#{fn}\" is a directory, I will not publish this.") unless File.exist?(dst_fn)
                 else
                     dst_dir = File.dirname(dst_fn)
                     FileUtils.mkdir_p(dst_dir) unless File.exist?(dst_dir)
-                    if (!File.exist?(dst_fn) or !FileUtils.identical?(fn, dst_fn))
+                    if (!File.exist?(new_fn) or !FileUtils.identical?(fn, new_fn))
                         puts("Installing \"#{fn}\" to \"#{dst_fn}\"")
                         FileUtils.install(fn, dst_dir, mode: na[:mode])
+                        FileUtils.mv(dst_fn, new_fn) if (dst_fn != new_fn)
                     end
                 end
             end
