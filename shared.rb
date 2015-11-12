@@ -61,7 +61,10 @@ module GUBG
     end
 
     def self.link_unless_exists(old, new)
-        FileUtils.ln_s(old, new) unless (File.exist?(new) or File.symlink?(new))
+        if (!File.exist?(new) and !File.symlink?(new))
+            puts("Linking #{new} to #{old}")
+            FileUtils.ln_s(old, new)
+        end
     end
     def link_unless_exists(old, new)
         GUBG::link_unless_exists(old, new)
@@ -88,16 +91,18 @@ module GUBG
 	    GUBG::os()
     end
 
-    def self.which(program)
-	path = case os
-		when :linux, :osx then `which #{program}`
-		when :windows then `where #{program}`
-		else raise("Unknown os #{os}") end
-	path.chomp!
-	path.empty? ? nil : path
+    def self.which(program, &block)
+        path = case os
+               when :linux, :osx then `which #{program}`
+               when :windows then `where #{program}`
+               else raise("Unknown os #{os}") end
+        path.chomp!
+        return nil if (path.empty?)
+        yield(path) if block_given?
+        path
     end
-    def which(program)
-	    GUBG::which(program)
+    def which(program, &block)
+        GUBG::which(program, &block)
     end
 end
 
