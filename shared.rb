@@ -36,28 +36,41 @@ module GUBG
         GUBG::md5sum(fn)
     end
 
-    def self.publish(src, pattern, na = {dst: nil, mode: nil}, &block)
+    def self.publish(src, na = {pattern: nil, dst: nil, mode: nil}, &block)
         dst = shared(na[:dst])
-        Dir.chdir(src) do
-            FileList.new(pattern).each do |fn|
-                dst_fn = File.join(dst, fn)
-                new_fn = (block_given? ? yield(dst_fn) : dst_fn)
-                if File.directory?(fn)
-                    puts("\"#{fn}\" is a directory, I will not publish this.") unless File.exist?(dst_fn)
-                else
-                    dst_dir = File.dirname(dst_fn)
-                    FileUtils.mkdir_p(dst_dir) unless File.exist?(dst_dir)
-                    if (!File.exist?(new_fn) or !FileUtils.identical?(fn, new_fn))
-                        puts("Installing \"#{fn}\" to \"#{dst_fn}\"")
-                        FileUtils.install(fn, dst_dir, mode: na[:mode])
-                        FileUtils.mv(dst_fn, new_fn) if (dst_fn != new_fn)
+        if File.directory?(src)
+            pattern = na[:pattern] || '*'
+            Dir.chdir(src) do
+                FileList.new(pattern).each do |fn|
+                    dst_fn = File.join(dst, fn)
+                    new_fn = (block_given? ? yield(dst_fn) : dst_fn)
+                    if File.directory?(fn)
+                        puts("\"#{fn}\" is a directory, I will not publish this.") unless File.exist?(dst_fn)
+                    else
+                        dst_dir = File.dirname(dst_fn)
+                        FileUtils.mkdir_p(dst_dir) unless File.exist?(dst_dir)
+                        if (!File.exist?(new_fn) or !FileUtils.identical?(fn, new_fn))
+                            puts("Installing \"#{fn}\" to \"#{dst_fn}\"")
+                            FileUtils.install(fn, dst_dir, mode: na[:mode])
+                            FileUtils.mv(dst_fn, new_fn) if (dst_fn != new_fn)
+                        end
                     end
                 end
             end
+        else
+            dst_fn = File.join(dst, src)
+            new_fn = (block_given? ? yield(dst_fn) : dst_fn)
+            dst_dir = File.dirname(dst_fn)
+            FileUtils.mkdir_p(dst_dir) unless File.exist?(dst_dir)
+            if (!File.exist?(new_fn) or !FileUtils.identical?(src, new_fn))
+                puts("Installing \"#{src}\" to \"#{dst_fn}\"")
+                FileUtils.install(src, dst_dir, mode: na[:mode])
+                FileUtils.mv(dst_fn, new_fn) if (dst_fn != new_fn)
+            end
         end
     end
-    def publish(src, pattern, na = {}, &block)
-        GUBG::publish(src, pattern, na, &block)
+    def publish(src, na = {}, &block)
+        GUBG::publish(src, na, &block)
     end
 
     def self.link_unless_exists(old, new)
@@ -81,14 +94,14 @@ module GUBG
     end
 
     def self.os()
-	    case RUBY_PLATFORM
-	    when /mingw/ then :windows
-	    when /darwin/ then :osx
-	    else :linux
-	    end
+        case RUBY_PLATFORM
+        when /mingw/ then :windows
+        when /darwin/ then :osx
+        else :linux
+        end
     end
     def os()
-	    GUBG::os()
+        GUBG::os()
     end
 
     def self.which(program, &block)

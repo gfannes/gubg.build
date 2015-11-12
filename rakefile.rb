@@ -3,7 +3,7 @@ begin
 rescue LoadError
     puts("Bootstrapping \"shared.rb\"")
     require('./shared.rb')
-    GUBG::publish('./', 'shared.rb')
+    GUBG::publish('shared.rb')
 end
 include GUBG
 
@@ -18,8 +18,8 @@ task :clean do
 end
 
 task :declare do
-    publish('./', 'shared.rb')
-    publish('src', '**/*.rb', dst: 'ruby')
+    publish('shared.rb')
+    publish('src', pattern: '**/*.rb', dst: 'ruby')
 end
 
 task :define => :declare do

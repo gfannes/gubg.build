@@ -3,12 +3,14 @@ require('gubg/build/MSVC.rb')
 require('gubg/build/FilePool.rb')
 require('gubg/build/IncludeParser.rb')
 require('set')
+require('fileutils')
 
 module Build
     class Executable
         include Rake::DSL
         @@re_cpp = /\.cpp$/
         @@re_hpp = /\.(hpp|h)$/
+        @@re_c = /\.c$/
         @@re_sep = /[\.\\\/]/
         @@ext_obj = '.obj'
         def initialize(exe_fn, na = {compiler: nil})
@@ -19,16 +21,16 @@ module Build
                             when :msvc then MSVC
                             else na[:compiler] end
             @compiler = compiler_type.new
-            @object_dir = Dir.pwd
+            @cache_dir = Dir.pwd
         end
 
         def exe_filename()
             @exe_fn
         end
 
-        def set_object_dir(dir)
-            @object_dir = dir
-            mkdir_p(@object_dir) unless File.exist?(@object_dir)
+        def set_cache_dir(dir)
+            @cache_dir = dir
+            mkdir_p(@cache_dir) unless File.exist?(@cache_dir)
         end
 
         def add_sources(sources)
@@ -37,6 +39,7 @@ module Build
                 case fn
                 when @@re_cpp then @filenames_per_type[:cpp] << fn
                 when @@re_hpp then @filenames_per_type[:hpp] << fn
+                when @@re_c then @filenames_per_type[:c] << fn
                 else puts("WARNING: unknown filetype for #{fn}")
                 end
             end
@@ -75,13 +78,17 @@ module Build
         def create_rules
             return if @rules_are_created
 
+            do_log = false
+
             pool = FilePool.new
             source_fns_.each{|fn|pool.register(fn)}
             header_fns_.each{|fn|pool.register(fn)}
 
             include_parser = IncludeParser.new
 
-            source_fns_.each do |source|
+            source_infos_.each do |info|
+                source = info[:fn]
+                type = info[:type]
                 #puts("Adding compile rule for #{source}")
 
                 #Determine the dependencies for source
@@ -93,7 +100,9 @@ module Build
                     if dependencies.add?(fn)
                         includes = include_parser.extract_includes(fn)
                         includes.each do |include_part|
+                            puts("Looking for #{include_part} in the file pool") if do_log
                             pool.find_files(include_part).each do |include_fn|
+                                puts("    Found: #{include_fn}") if do_log
                                 dependencies_staging << include_fn 
                             end
                         end
@@ -101,13 +110,38 @@ module Build
                 end
 
                 object = object_fn_(source)
+
+                compile_cmd = @compiler.compile_command(object, source, type)
+
+                #We create an extra dependency file containing things like the actual compilation command
+                #to make sure we recompile when the compiler flags change
+                settings_fn = create_settings_file_(object+'.settings.txt') do |fo|
+                    fo.puts(compile_cmd)
+                end
+                dependencies.add(settings_fn)
+
+                if do_log
+                    puts("Dependencies for #{object}:")
+                    dependencies.each{|dep|puts(" => #{dep}")}
+                end
                 file object => dependencies.to_a do
-                    sh @compiler.compile_command(object, source)
+                    sh compile_cmd
                 end
             end
+
             object_fns = object_fns_
-            file @exe_fn => object_fns do
-                sh @compiler.link_command(@exe_fn, object_fns)
+            cached_exe_fn = cache_fn_(@exe_fn)
+            link_cmd = @compiler.link_command(cached_exe_fn, object_fns)
+            #We create an extra dependency file containing things like the actual link command
+            #to make sure we relink when the linker flags change
+            settings_fn = create_settings_file_(cached_exe_fn+'.settings.txt') do |fo|
+                fo.puts(link_cmd)
+            end
+            file cached_exe_fn => [settings_fn, object_fns].flatten do
+                sh link_cmd
+            end
+            file @exe_fn => cached_exe_fn do
+                FileUtils.install(cached_exe_fn, @exe_fn)
             end
             namespace namespace_name_ do
                 task :link => @exe_fn
@@ -150,19 +184,46 @@ module Build
         end
 
         private
+        def create_settings_file_(fn, &block)
+            #We work with a tmp settings file, else, the rake file task will always build the object
+            #because of the recent timestamp
+            tmp_fn = fn+'.tmp'
+            raise("Cannot create the temporary settings file \"#{tmp_fn}\", it already exists") if File.exist?(tmp_fn)
+            begin
+                File.open(tmp_fn, 'w') do |fo|
+                    yield(fo)
+                end
+                FileUtils.install(tmp_fn, fn)
+            ensure
+                FileUtils.rm(tmp_fn)
+            end
+            fn
+        end
         def namespace_name_(t = nil)
             name = "gubg_build_executable_#{@exe_fn}"
             name += ":#{t}" if t
             name
         end
+        def source_infos_
+            ary = []
+            [:cpp, :c].each do |type|
+                @filenames_per_type[type].each do |fn|
+                    ary << {fn: fn, type: type}
+                end
+            end
+            ary
+        end
         def source_fns_
-            @filenames_per_type[:cpp]
+            source_infos_.map{|info|info[:fn]}
         end
         def header_fns_
             @filenames_per_type[:hpp]
         end
+        def cache_fn_(fn)
+            File.join(@cache_dir, fn.gsub(@@re_sep, '_'))
+        end
         def object_fn_(source)
-            File.join(@object_dir, source.gsub(@@re_sep, '_')+@@ext_obj)
+            cache_fn_(source)+@@ext_obj
         end
         def object_fns_
             source_fns_.map{|fn|object_fn_(fn)}
