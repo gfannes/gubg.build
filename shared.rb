@@ -29,6 +29,20 @@ module GUBG
         GUBG::shared_dir(*parts)
     end
 
+    def self.each_submod(submods, &block)
+        [submods].flatten.each do |submod|
+            raise("Could not find rakefile.rb in #{submod}, did you check it out?") unless File.exist?(File.join(submod, 'rakefile.rb'))
+            puts(">>>> #{submod}")
+            Dir.chdir(submod) do
+                yield(submod)
+            end
+            puts("<<<< #{submod}")
+        end
+    end
+    def each_submod(submods, &block)
+        GUBG::each_submod(submods, &block)
+    end
+
     def self.md5sum(fn)
         Digest::MD5.hexdigest(File.open(fn, 'rb'){|fi|fi.read})
     end
