@@ -6,26 +6,26 @@ require('set')
 require('fileutils')
 
 module Build
-    class Executable
+    class Library
         include Rake::DSL
         @@re_cpp = /\.cpp$/
         @@re_hpp = /\.(hpp|h)$/
         @@re_c = /\.c$/
         @@re_sep = /[\.\\\/]/
         @@ext_obj = '.obj'
-        def initialize(exe_fn, na = {compiler: nil})
-            @exe_fn = exe_fn
+        def initialize(lib_fn, na = {compiler: nil})
             @filenames_per_type = Hash.new{|h,k|h[k] = []}
             compiler_type = case na[:compiler]
                             when NilClass, :gcc then GCC
                             when :msvc then MSVC
                             else na[:compiler] end
             @compiler = compiler_type.new
+            @lib_fn = @compiler.libname(lib_fn)
             set_cache_dir('.cache')
         end
 
-        def exe_filename()
-            @exe_fn
+        def lib_filename()
+            @lib_fn
         end
 
         def set_cache_dir(dir)
@@ -57,16 +57,6 @@ module Build
         def add_force_include(*fns)
             [fns].flatten.each do |fn|
                 @compiler.add_force_include(fn)
-            end
-        end
-        def add_library_path(*paths)
-            [paths].flatten.each do |path|
-                @compiler.add_library_path(path)
-            end
-        end
-        def add_library(*libs)
-            [libs].flatten.each do |lib|
-                @compiler.add_library(lib)
             end
         end
         def add_option(*options)
@@ -130,26 +120,23 @@ module Build
             end
 
             object_fns = object_fns_
-            cached_exe_fn = cache_fn_(@exe_fn)
-            link_cmd = @compiler.link_command(:exe, cached_exe_fn, object_fns)
+            cached_lib_fn = cache_fn_(@lib_fn)
+            link_cmd = @compiler.link_command(:lib, cached_lib_fn, object_fns)
             #We create an extra dependency file containing things like the actual link command
             #to make sure we relink when the linker flags change
-            settings_fn = create_settings_file_(cached_exe_fn+'.settings.txt') do |fo|
+            settings_fn = create_settings_file_(cached_lib_fn+'.settings.txt') do |fo|
                 fo.puts(link_cmd)
             end
-            file cached_exe_fn => [settings_fn, object_fns].flatten do
+            file cached_lib_fn => [settings_fn, object_fns].flatten do
                 sh link_cmd
             end
-            file @exe_fn => cached_exe_fn do
-                FileUtils.install(cached_exe_fn, @exe_fn)
+            file @lib_fn => cached_lib_fn do
+                FileUtils.install(cached_lib_fn, @lib_fn)
             end
             namespace namespace_name_ do
-                task :link => @exe_fn
+                task :link => @lib_fn
                 task :clean do
                     clean
-                end
-                task :run do
-                    run
                 end
             end
             @rules_are_created = true
@@ -158,15 +145,11 @@ module Build
         #Performs the operations immediately
         def clean
             object_fns_().each{|fn|rm_f(fn)}
-            rm_f(@exe_fn)
+            rm_f(@lib_fn)
         end
         def build
             create_rules
-            Rake::Task[@exe_fn].invoke()
-        end
-        def run
-            build
-            sh "./#{@exe_fn}"
+            Rake::Task[@lib_fn].invoke()
         end
 
         #Rulenames to be used as rake rule prerequistite
@@ -200,7 +183,7 @@ module Build
             fn
         end
         def namespace_name_(t = nil)
-            name = "gubg_build_executable_#{@exe_fn}"
+            name = "gubg_build_library_#{@lib_fn}"
             name += ":#{t}" if t
             name
         end
