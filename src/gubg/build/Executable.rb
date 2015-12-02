@@ -164,9 +164,9 @@ module Build
             create_rules
             Rake::Task[@exe_fn].invoke()
         end
-        def run
+        def run(options)
             build
-            sh "./#{@exe_fn}"
+            sh "./#{@exe_fn}", *([options].flatten)
         end
 
         #Rulenames to be used as rake rule prerequistite
