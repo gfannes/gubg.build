@@ -49,7 +49,7 @@ module Build
                 @compiler.add_include_path(path)
             end
         end
-        def add_defines(defines)
+        def add_define(defines)
             [defines].flatten.each do |define|
                 @compiler.add_define(define)
             end
