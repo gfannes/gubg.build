@@ -36,7 +36,7 @@ module GUBG
             Dir.chdir(submod) do
                 yield(submod)
             end
-            puts("<<<< #{submod}")
+            puts("<<<< #{submod}\n\n")
         end
     end
     def each_submod(submods, &block)
