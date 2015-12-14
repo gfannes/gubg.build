@@ -14,7 +14,7 @@ module Build
         @@re_sep = /[\.\\\/]/
         @@ext_obj = '.obj'
         def initialize(exe_fn, na = {compiler: nil})
-            @exe_fn = exe_fn
+            @exe_fn = exe_fn + '.exe'
             @filenames_per_type = Hash.new{|h,k|h[k] = []}
             compiler_type = case na[:compiler]
                             when NilClass, :gcc then GCC
@@ -220,7 +220,8 @@ module Build
             @filenames_per_type[:hpp]
         end
         def cache_fn_(fn)
-            File.join(@cache_dir, fn.gsub(@@re_sep, '_'))
+            ext = File.extname(fn)
+            File.join(@cache_dir, fn.gsub(@@re_sep, '_')) + ext
         end
         def object_fn_(source)
             cache_fn_(source)+@@ext_obj
