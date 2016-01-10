@@ -35,7 +35,7 @@ namespace :test do
     task :setup do
         require('gubg/build/Executable.rb')
         exe = Build::Executable.new('test.exe')
-        exe.set_object_dir('.objects')
+        exe.set_cache_dir('.cache')
         exe.add_sources(FileList.new('test/**/*.*'))
         exe.add_include_path('test/inc')
     end
