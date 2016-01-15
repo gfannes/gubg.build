@@ -64,7 +64,7 @@ module GUBG
                         dst_dir = File.dirname(dst_fn)
                         FileUtils.mkdir_p(dst_dir) unless File.exist?(dst_dir)
                         if (!File.exist?(new_fn) or !FileUtils.identical?(fn, new_fn))
-                            puts("Installing \"#{fn}\" to \"#{dst_fn}\"")
+                            puts("Installing \"#{fn}\" to \"#{new_fn}\"")
                             FileUtils.install(fn, dst_dir, mode: na[:mode])
                             FileUtils.mv(dst_fn, new_fn) if (dst_fn != new_fn)
                         end
