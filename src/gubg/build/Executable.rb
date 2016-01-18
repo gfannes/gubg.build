@@ -11,7 +11,7 @@ module Build
         @@re_cpp = /\.cpp$/
         @@re_hpp = /\.(hpp|h)$/
         @@re_c = /\.c$/
-        @@re_sep = /[\.\\\/]/
+        @@re_sep = /[\.\\\/:]/
         @@ext_obj = '.obj'
         def initialize(exe_fn, na = {compiler: nil})
             @exe_fn = exe_fn + '.exe'
