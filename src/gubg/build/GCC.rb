@@ -18,8 +18,13 @@ module Build
             else raise("Unknown source type #{type}") end
         end
         def link_command(type, fn, objects)
+            options_cmd = @options.map do |o|
+                case o
+                when 'pg', 'm32' then "-#{o}"
+                else nil end
+            end.compact*' '
             case type
-            when :exe then "g++ -o #{fn} #{objects*' '} #{lib_sp_cli} #{lib_cli}"
+            when :exe then "g++ #{options_cmd} -o #{fn} #{objects*' '} #{lib_sp_cli} #{lib_cli}"
             when :lib then "ar rcs #{fn} #{objects*' '}"
             else raise("Unknown link type #{type}") end
         end

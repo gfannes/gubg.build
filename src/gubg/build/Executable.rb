@@ -27,6 +27,9 @@ module Build
         def exe_filename()
             @exe_fn
         end
+        def name()
+            @exe_fn
+        end
 
         def set_cache_dir(dir)
             @cache_dir = dir
