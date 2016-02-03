@@ -53,20 +53,22 @@ module GUBG
     def self.publish(src, na = {pattern: nil, dst: nil, mode: nil}, &block)
         dst = shared(na[:dst])
         if File.directory?(src)
-            pattern = na[:pattern] || '*'
+            patterns = [na[:pattern] || '*'].flatten
             Dir.chdir(src) do
-                FileList.new(pattern).each do |fn|
-                    dst_fn = File.join(dst, fn)
-                    new_fn = (block_given? ? yield(dst_fn) : dst_fn)
-                    if File.directory?(fn)
-                        puts("\"#{fn}\" is a directory, I will not publish this.") unless File.exist?(dst_fn)
-                    else
-                        dst_dir = File.dirname(dst_fn)
-                        FileUtils.mkdir_p(dst_dir) unless File.exist?(dst_dir)
-                        if (!File.exist?(new_fn) or !FileUtils.identical?(fn, new_fn))
-                            puts("Installing \"#{fn}\" to \"#{new_fn}\"")
-                            FileUtils.install(fn, dst_dir, mode: na[:mode])
-                            FileUtils.mv(dst_fn, new_fn) if (dst_fn != new_fn)
+                patterns.each do |pattern|
+                    FileList.new(pattern).each do |fn|
+                        dst_fn = File.join(dst, fn)
+                        new_fn = (block_given? ? yield(dst_fn) : dst_fn)
+                        if File.directory?(fn)
+                            # puts("\"#{fn}\" is a directory, I will not publish this.") unless File.exist?(dst_fn)
+                        else
+                            dst_dir = File.dirname(dst_fn)
+                            FileUtils.mkdir_p(dst_dir) unless File.exist?(dst_dir)
+                            if (!File.exist?(new_fn) or !FileUtils.identical?(fn, new_fn))
+                                puts("Installing \"#{fn}\" to \"#{new_fn}\"")
+                                FileUtils.install(fn, dst_dir, mode: na[:mode])
+                                FileUtils.mv(dst_fn, new_fn) if (dst_fn != new_fn)
+                            end
                         end
                     end
                 end
