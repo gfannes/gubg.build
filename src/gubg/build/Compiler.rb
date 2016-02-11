@@ -1,6 +1,7 @@
 module Build
     class Compiler
         def initialize()
+            @cpp_standard = nil
             @include_paths = []
             @defines = []
             @force_includes = []
@@ -9,6 +10,9 @@ module Build
             @options = []
         end
 
+        def set_cpp_standard(std)
+            @cpp_standard = std
+        end
         def add_include_path(path)
             @include_paths << path
         end

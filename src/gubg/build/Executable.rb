@@ -36,6 +36,10 @@ module Build
             mkdir_p(@cache_dir) unless File.exist?(@cache_dir)
         end
 
+        def set_cpp_standard(std)
+            @compiler.set_cpp_standard(std)
+        end
+
         def add_sources(sources)
             expand_(sources).each do |fn|
                 #puts("Adding #{fn}")
