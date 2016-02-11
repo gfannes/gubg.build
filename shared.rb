@@ -29,9 +29,11 @@ module GUBG
         GUBG::shared_dir(*parts)
     end
 
+    class MissingSubmoduleError < StandardError
+    end
     def self.each_submod(submods, &block)
         [submods].flatten.each do |submod|
-            raise("Could not find rakefile.rb in #{submod}, did you check it out?") unless File.exist?(File.join(submod, 'rakefile.rb'))
+            raise(MissingSubmoduleError, "Could not find rakefile.rb in #{submod}, did you check it out?") unless File.exist?(File.join(submod, 'rakefile.rb'))
             puts(">>>> #{submod}")
             Dir.chdir(submod) do
                 yield(submod)
