@@ -6,7 +6,11 @@ module Build
             include_paths_cmd = @include_paths.map{|ip|"-I#{ip}"}*' '
             defines_cmd = @defines.map{|d|"-D#{d}"}*' '
             force_includes_cmd = @force_includes.map{|fi|"/FI#{fi}"}*' '
-            options_cmd = @options.map{|o|"-#{o}"}*' '
+            options_cmd = @options.map do |o|
+                case o
+                when 'm32', 'O3', 'pg' then nil
+                else "-#{o}" end
+            end.compact*' '
             type_cmd = case type
                        when :cpp then ''
                        when :c then '/TC'
