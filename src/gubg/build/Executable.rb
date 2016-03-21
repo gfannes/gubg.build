@@ -13,6 +13,7 @@ module Build
         @@re_c = /\.c$/
         @@re_sep = /[\.\\\/:]/
         @@ext_obj = '.obj'
+        @@max_nr_threads = 8
         def initialize(exe_fn, na = {compiler: nil})
             @exe_fn = exe_fn + '.exe'
             @filenames_per_type = Hash.new{|h,k|h[k] = []}
@@ -22,6 +23,8 @@ module Build
                             else na[:compiler] end
             @compiler = compiler_type.new
             set_cache_dir('.cache')
+            @threadcount = 0
+            @mutex = Mutex.new
         end
 
         def exe_filename()
@@ -132,7 +135,20 @@ module Build
                     dependencies.each{|dep|puts(" => #{dep}")}
                 end
                 file object => dependencies.to_a do
+                    #Poor mans semaphore...
+                    execute = false
+                    @mutex.synchronize do
+                        if @threadcount < @@max_nr_threads
+                            @threadcount += 1
+                            execute = true
+                        else
+                            sleep(0.1)
+                        end
+                    end while not execute
                     sh compile_cmd
+                    @mutex.synchronize do
+                        @threadcount -= 1
+                    end
                 end
             end
 
@@ -144,14 +160,15 @@ module Build
             settings_fn = create_settings_file_(cached_exe_fn+'.settings.txt') do |fo|
                 fo.puts(link_cmd)
             end
-            file cached_exe_fn => [settings_fn, object_fns].flatten do
+            file cached_exe_fn => settings_fn do
                 sh link_cmd
             end
             file @exe_fn => cached_exe_fn do
                 FileUtils.install(cached_exe_fn, @exe_fn)
             end
             namespace namespace_name_ do
-                task :link => @exe_fn
+                multitask :compile => object_fns
+                task :link => [:compile, @exe_fn]
                 task :clean do
                     clean
                 end
@@ -169,7 +186,7 @@ module Build
         end
         def build
             create_rules
-            Rake::Task[@exe_fn].invoke()
+            Rake::Task[namespace_name_(:link)].invoke()
         end
         def run(options = nil)
             build
