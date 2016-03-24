@@ -96,6 +96,8 @@ module Build
 
             include_parser = IncludeParser.new
 
+            do_link = false
+
             source_infos_.each do |info|
                 source = info[:fn]
                 type = info[:type]
@@ -135,6 +137,7 @@ module Build
                     dependencies.each{|dep|puts(" => #{dep}")}
                 end
                 file object => dependencies.to_a do
+                    do_link = true
                     #Poor mans semaphore...
                     execute = false
                     @mutex.synchronize do
@@ -160,15 +163,15 @@ module Build
             settings_fn = create_settings_file_(cached_exe_fn+'.settings.txt') do |fo|
                 fo.puts(link_cmd)
             end
-            file cached_exe_fn => settings_fn do
-                sh link_cmd
-            end
-            file @exe_fn => cached_exe_fn do
-                FileUtils.install(cached_exe_fn, @exe_fn)
-            end
             namespace namespace_name_ do
                 multitask :compile => object_fns
-                task :link => [:compile, @exe_fn]
+                task :link => settings_fn do
+                    sh link_cmd
+                    FileUtils.install(cached_exe_fn, @exe_fn)
+                end
+                file @exe_fn => :compile do
+                    Rake::Task[namespace_name_(:link)].invoke if do_link
+                end
                 task :clean do
                     clean
                 end
@@ -186,7 +189,7 @@ module Build
         end
         def build
             create_rules
-            Rake::Task[namespace_name_(:link)].invoke()
+            Rake::Task[@exe_fn].invoke()
         end
         def run(options = nil)
             build
