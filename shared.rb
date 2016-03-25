@@ -3,7 +3,7 @@ require('digest/md5')
 
 module GUBG
     def self.shared(*parts)
-        raise('ERROR: You have to specify the shared destination dir via the environment vairable "gubg"') unless ENV.has_key?('gubg')
+        raise('ERROR: You have to specify the shared destination dir via the environment variable "gubg"') unless ENV.has_key?('gubg')
         File.join(ENV['gubg'], *parts.compact)
     end
     #Makes sure we can "include GUBG" to call shared() directly
