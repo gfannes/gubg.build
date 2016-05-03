@@ -10,12 +10,12 @@ module Build
             defines_cmd = @defines.map{|ip|"-D#{ip}"}*' '
             force_includes_cmd = @force_includes.map{|fi|"-include #{fi}"}*' '
             options_cmd = @options.map{|o|"-#{o}"}*' '
-            cpp_standard_cmd = "-std=#{@cpp_standard || 'c++11'}"
+            cpp_standard_cmd = "-std=#{@cpp_standard || 'c++14'}"
             case type
             when :cpp
-                "g++ #{cpp_standard_cmd} -c #{source} -o #{object} #{include_paths_cmd} #{defines_cmd} #{force_includes_cmd} #{options_cmd}"
+                "g++ -fdiagnostics-color #{cpp_standard_cmd} -c #{source} -o #{object} #{include_paths_cmd} #{defines_cmd} #{force_includes_cmd} #{options_cmd}"
             when :c
-                "gcc -c #{source} -o #{object} #{include_paths_cmd} #{defines_cmd} #{force_includes_cmd} #{options_cmd}"
+                "gcc -fdiagnostics-color -c #{source} -o #{object} #{include_paths_cmd} #{defines_cmd} #{force_includes_cmd} #{options_cmd}"
             else raise("Unknown source type #{type}") end
         end
         def link_command(type, fn, objects)
@@ -25,7 +25,7 @@ module Build
                 else nil end
             end.compact*' '
             case type
-            when :exe then "g++ #{options_cmd} -o #{fn} #{objects*' '} #{lib_sp_cli} #{lib_cli}"
+            when :exe then "g++ -fdiagnostics-color #{options_cmd} -o #{fn} #{objects*' '} #{lib_sp_cli} #{lib_cli}"
             when :lib then "ar rcs #{fn} #{objects*' '}"
             else raise("Unknown link type #{type}") end
         end
