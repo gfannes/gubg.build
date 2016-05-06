@@ -4,7 +4,7 @@ module Build
     class GCC < Compiler
         def GCC.version()
             return @version_ if @version_
-            re = /(\d+)\.(\d+)\.(\d+)$/
+            re = /(\d+)\.(\d+)\.(\d+)( \d\d\d\d\d\d\d\d)?$/
             output = `gcc --version`.split('\n')[0]
             if md = re.match(output)
                 @version_ = md[1].to_i*10+md[2].to_i
