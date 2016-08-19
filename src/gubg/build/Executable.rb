@@ -7,6 +7,7 @@ require('fileutils')
 
 module Build
     class Executable
+
         include Rake::DSL
         @@re_cpp = /\.cpp$/
         @@re_hpp = /\.(hpp|h)$/
@@ -14,7 +15,8 @@ module Build
         @@re_sep = /[\.\\\/:]/
         @@ext_obj = '.obj'
         @@max_nr_threads = 8
-        def initialize(exe_fn, na = {compiler: nil})
+
+        def initialize(exe_fn, na = {compiler: nil, arch: nil})
             @exe_fn = exe_fn + '.exe'
             @filenames_per_type = Hash.new{|h,k|h[k] = []}
             compiler_type = case na[:compiler]
@@ -22,6 +24,7 @@ module Build
                             when :msvc then MSVC
                             else na[:compiler] end
             @compiler = compiler_type.new
+            @compiler.set_arch(na[:arch])
             set_cache_dir('.cache')
             @threadcount = 0
             @mutex = Mutex.new
