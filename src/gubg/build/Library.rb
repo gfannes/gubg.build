@@ -13,13 +13,14 @@ module Build
         @@re_c = /\.c$/
         @@re_sep = /[\.\\\/]/
         @@ext_obj = '.obj'
-        def initialize(lib_fn, na = {compiler: nil})
+        def initialize(lib_fn, na = {compiler: nil, arch: nil})
             @filenames_per_type = Hash.new{|h,k|h[k] = []}
             compiler_type = case na[:compiler]
                             when NilClass, :gcc then GCC
                             when :msvc then MSVC
                             else na[:compiler] end
             @compiler = compiler_type.new
+            @compiler.set_arch(na[:arch])
             @lib_fn = @compiler.libname(lib_fn)
             set_cache_dir('.cache')
         end
@@ -121,14 +122,18 @@ module Build
 
             object_fns = object_fns_
             cached_lib_fn = cache_fn_(@lib_fn)
-            link_cmd = @compiler.link_command(:lib, cached_lib_fn, object_fns)
+            link_cmds = @compiler.link_commands(:lib, cached_lib_fn, object_fns)
             #We create an extra dependency file containing things like the actual link command
             #to make sure we relink when the linker flags change
             settings_fn = create_settings_file_(cached_lib_fn+'.settings.txt') do |fo|
-                fo.puts(link_cmd)
+                link_cmds.each do |link_cmd|
+                    fo.puts(link_cmd)
+                end
             end
             file cached_lib_fn => [settings_fn, object_fns].flatten do
-                sh link_cmd
+                link_cmds.each do |link_cmd|
+                    sh link_cmd
+                end
             end
             file @lib_fn => cached_lib_fn do
                 FileUtils.install(cached_lib_fn, @lib_fn)

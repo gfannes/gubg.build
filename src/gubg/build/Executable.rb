@@ -17,7 +17,10 @@ module Build
         @@max_nr_threads = 8
 
         def initialize(exe_fn, na = {compiler: nil, arch: nil})
-            @exe_fn = exe_fn + '.exe'
+            @exe_fn = case na[:arch]
+                      when NilClass then exe_fn + '.exe'
+                      when :uno then exe_fn + '.elf'
+                      end
             @filenames_per_type = Hash.new{|h,k|h[k] = []}
             compiler_type = case na[:compiler]
                             when NilClass, :gcc then GCC
@@ -160,16 +163,20 @@ module Build
 
             object_fns = object_fns_
             cached_exe_fn = cache_fn_(@exe_fn)
-            link_cmd = @compiler.link_command(:exe, cached_exe_fn, object_fns)
+            link_cmds = @compiler.link_commands(:exe, cached_exe_fn, object_fns)
             #We create an extra dependency file containing things like the actual link command
             #to make sure we relink when the linker flags change
             settings_fn = create_settings_file_(cached_exe_fn+'.settings.txt') do |fo|
-                fo.puts(link_cmd)
+                link_cmds.each do |link_cmd|
+                    fo.puts(link_cmd)
+                end
             end
             namespace namespace_name_ do
                 multitask :compile => object_fns
                 task :link => settings_fn do
-                    sh link_cmd
+                    link_cmds.each do |link_cmd|
+                        sh link_cmd
+                    end
                     FileUtils.install(cached_exe_fn, @exe_fn)
                 end
                 file @exe_fn => :compile do

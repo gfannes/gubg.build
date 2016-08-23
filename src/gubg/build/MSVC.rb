@@ -17,10 +17,10 @@ module Build
                        else raise("Unknown source type #{type}") end
             "cl -c #{source} /Fo#{object} #{type_cmd} #{options_cmd} #{include_paths_cmd} #{defines_cmd} #{force_includes_cmd}"
         end
-        def link_command(type, exe, objects)
+        def link_commands(type, exe, objects)
             library_paths_cmd = @library_paths.map{|lp|"-libpath:#{lp}"}*' '
             libraries_cmd = @libraries.map{|lib|"#{lib}.lib"}*' '
-            "link /OUT:#{exe} #{objects*' '} #{library_paths_cmd} #{libraries_cmd}"
+            ["link /OUT:#{exe} #{objects*' '} #{library_paths_cmd} #{libraries_cmd}"]
         end
     end
 end
