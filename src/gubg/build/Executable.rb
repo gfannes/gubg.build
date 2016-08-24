@@ -17,17 +17,17 @@ module Build
         @@max_nr_threads = 8
 
         def initialize(exe_fn, na = {compiler: nil, arch: nil})
-            @exe_fn = case na[:arch]
-                      when NilClass then exe_fn + '.exe'
-                      when :uno then exe_fn + '.elf'
+            @arch = na[:arch] || :default
+            @exe_fn = case @arch
+                      when :default then exe_fn + '.exe'
+                      when :uno, :lilypad then exe_fn + '.elf'
                       end
             @filenames_per_type = Hash.new{|h,k|h[k] = []}
             compiler_type = case na[:compiler]
                             when NilClass, :gcc then GCC
                             when :msvc then MSVC
                             else na[:compiler] end
-            @compiler = compiler_type.new
-            @compiler.set_arch(na[:arch])
+            @compiler = compiler_type.new(@arch)
             set_cache_dir('.cache')
             @threadcount = 0
             @mutex = Mutex.new

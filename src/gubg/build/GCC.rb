@@ -13,6 +13,47 @@ module Build
             end
             return @version_
         end
+        def add_arch_settings_
+            return if @arch_settings_added_
+            case @arch
+            when :default
+            when :uno, :lilypad
+                @options << 'flto'
+                # @options << 'w'
+                # @options << 'x'
+                # @options << 'c++'
+                # @options << 'E'
+                # @options << 'CC'
+                # @options << 'Wa,-mmcu=atmega328p'
+                # @options << 'Wa,-mmcu=avr5'
+                @defines << 'ARDUINO=10610'
+                @defines << 'ARDUINO_ARCH_AVR'
+                @include_paths << GUBG::shared('extern/Arduino-master/hardware/arduino/avr/cores/arduino')
+
+                variant = nil
+                case @arch
+                when :uno
+                    variant = 'standard'
+                    @options << 'mmcu=atmega328p'
+                    @defines << 'ARDUINO_AVR_UNO'
+                    @defines << 'F_CPU=16000000L'
+                when :lilypad
+                    variant = 'leonardo'
+                    @options << 'mmcu=atmega32u4'
+                    @defines << 'ARDUINO_AVR_LILYPAD_USB'
+                    @defines << 'F_CPU=8000000L'
+                    @defines << 'USB_VID=0x1B4F'
+                    @defines << 'USB_PID=0x9208'
+                    @defines << '\'USB_MANUFACTURER="Unknown"\''
+                    @defines << '\'USB_PRODUCT="LilyPad USB"\''
+                    @libraries << 'm'
+                    # @libraries << 'stdc++'
+                end
+                @include_paths << GUBG::shared("extern/Arduino-master/hardware/arduino/avr/variants/#{variant}")
+            else
+            end
+            @arch_settings_added_ = true
+        end
         def libname(name)
             "lib#{name}.a"
         end
@@ -20,28 +61,13 @@ module Build
             (GCC.version >= 49 ? '-fdiagnostics-color' : '')
         end
         def compile_command(object, source, type)
+            add_arch_settings_()
             default_std = (GCC.version >= 49 ? 'c++14' : 'c++11')
             cpp_standard_cmd = "-std=#{@cpp_standard || default_std}"
             compiler_cmd = case @arch
-                           when NilClass
+                           when :default
                                {cpp: "g++ #{cpp_standard_cmd} -c", c: "gcc -c"}
-                           when :uno
-                               
-                               @options << 'flto'
-                               # @options << 'w'
-                               # @options << 'x'
-                               # @options << 'c++'
-                               # @options << 'E'
-                               # @options << 'CC'
-                               @options << 'mmcu=atmega328p'
-                               # @options << 'Wa,-mmcu=atmega328p'
-                               # @options << 'Wa,-mmcu=avr5'
-                               @defines << 'F_CPU=16000000L'
-                               @defines << 'ARDUINO=10610'
-                               @defines << 'ARDUINO_AVR_UNO'
-                               @defines << 'ARDUINO_ARCH_AVR'
-                               @include_paths << GUBG::shared('extern/Arduino-master/hardware/arduino/avr/cores/arduino')
-                               @include_paths << GUBG::shared('extern/Arduino-master/hardware/arduino/avr/variants/standard')
+                           when :uno, :lilypad
                                {
                                    cpp: "avr-g++ -c -g -Os -w #{cpp_standard_cmd} -fpermissive -fno-exceptions -ffunction-sections -fdata-sections",
                                    c: "avr-gcc -c -g",
@@ -68,16 +94,17 @@ module Build
             case type
             when :exe then
                 linker_cmd = case @arch
-                             when NilClass then "g++ #{color_cmd}"
+                             when :default then "g++ #{color_cmd}"
                              when :uno then "avr-gcc #{color_cmd} -w -Os -flto -fuse-linker-plugin -Wl,--gc-sections -mmcu=atmega328p"
+                             when :lilypad then "avr-gcc #{color_cmd} -w -Os -flto -fuse-linker-plugin -Wl,--gc-sections -mmcu=atmega32u4"
                              end
                 objects_cmd = case @arch
-                              when NilClass then objects*' '
-                              when :uno then (objects+[shared_dir('lib/libarduino-core.a')])*' '
+                              when :default then objects*' '
+                              when :uno, :lilypad then (objects+[shared_dir("lib/#{@arch}/libarduino-core.a")])*' '
                               end
                 cmds << "#{linker_cmd} #{options_cmd} -o #{fn} #{objects_cmd} #{lib_sp_cli} #{lib_cli}"
                 case @arch
-                when :uno
+                when :uno, :lilypad
                     cmds << "avr-objcopy -O ihex -j .eeprom --set-section-flags=.eeprom=alloc,load --no-change-warnings --change-section-lma .eeprom=0 #{fn} #{fn}.eep"
                     cmds << "avr-objcopy -O ihex -R .eeprom #{fn} #{fn}.hex"
                     avrdude_conf = "-C#{shared('extern/Arduino-master/hardware/tools/avr/etc/avrdude.conf')}"
@@ -87,9 +114,9 @@ module Build
                 end
             when :lib then
                 ar_cmd = case @arch
-                             when NilClass then "ar"
-                             when :uno then "avr-gcc-ar"
-                             end
+                         when :default then "ar"
+                         when :uno, :lilypad then "avr-gcc-ar"
+                         end
                 cmds << "#{ar_cmd} rcs #{fn} #{objects*' '}"
             else raise("Unknown link type #{type}") end
 

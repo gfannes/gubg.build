@@ -14,13 +14,13 @@ module Build
         @@re_sep = /[\.\\\/]/
         @@ext_obj = '.obj'
         def initialize(lib_fn, na = {compiler: nil, arch: nil})
+            @arch = na[:arch] || :default
             @filenames_per_type = Hash.new{|h,k|h[k] = []}
             compiler_type = case na[:compiler]
                             when NilClass, :gcc then GCC
                             when :msvc then MSVC
                             else na[:compiler] end
-            @compiler = compiler_type.new
-            @compiler.set_arch(na[:arch])
+            @compiler = compiler_type.new(@arch)
             @lib_fn = @compiler.libname(lib_fn)
             set_cache_dir('.cache')
         end
@@ -135,11 +135,15 @@ module Build
                     sh link_cmd
                 end
             end
-            file @lib_fn => cached_lib_fn do
-                FileUtils.install(cached_lib_fn, @lib_fn)
-            end
+            # file @lib_fn => cached_lib_fn do
+            #     FileUtils.install(cached_lib_fn, @lib_fn)
+            # end
             namespace namespace_name_ do
-                task :link => @lib_fn
+                task :build => cached_lib_fn do
+                    FileUtils.install(cached_lib_fn, @lib_fn)
+                end
+                # task :link => @lib_fn
+                task :link => :build
                 task :clean do
                     clean
                 end
@@ -154,7 +158,8 @@ module Build
         end
         def build
             create_rules
-            Rake::Task[@lib_fn].invoke()
+            # Rake::Task[@lib_fn].invoke()
+            Rake::Task[namespace_name_(:build)].invoke()
         end
 
         #Rulenames to be used as rake rule prerequistite
@@ -178,17 +183,19 @@ module Build
             tmp_fn = fn+'.tmp'
             raise("Cannot create the temporary settings file \"#{tmp_fn}\", it already exists") if File.exist?(tmp_fn)
             begin
+                dir = File.dirname(tmp_fn)
+                FileUtils.mkdir_p(dir) unless File.exist?(dir)
                 File.open(tmp_fn, 'w') do |fo|
                     yield(fo)
                 end
                 FileUtils.install(tmp_fn, fn)
             ensure
-                FileUtils.rm(tmp_fn)
+                FileUtils.rm(tmp_fn) if File.exist?(tmp_fn)
             end
             fn
         end
         def namespace_name_(t = nil)
-            name = "gubg_build_library_#{@lib_fn}"
+            name = "gubg_build_library_#{@arch}_#{@lib_fn}"
             name += ":#{t}" if t
             name
         end
@@ -208,7 +215,7 @@ module Build
             @filenames_per_type[:hpp]
         end
         def cache_fn_(fn)
-            File.join(@cache_dir, fn.gsub(@@re_sep, '_'))
+            File.join(@cache_dir, @arch.to_s, fn.gsub(@@re_sep, '_'))
         end
         def object_fn_(source)
             cache_fn_(source)+@@ext_obj

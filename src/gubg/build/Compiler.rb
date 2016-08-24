@@ -1,7 +1,7 @@
 module Build
     class Compiler
-        def initialize()
-            @arch = nil
+        def initialize(arch)
+            @arch = arch
             @cpp_standard = nil
             @include_paths = []
             @defines = []
@@ -11,9 +11,6 @@ module Build
             @options = []
         end
 
-        def set_arch(arch)
-            @arch = arch
-        end
         def set_cpp_standard(std)
             @cpp_standard = std
         end
