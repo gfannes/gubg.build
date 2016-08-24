@@ -73,7 +73,7 @@ module Build
                              end
                 objects_cmd = case @arch
                               when NilClass then objects*' '
-                              when :uno then ([shared_dir('lib/libarduino-core.a')]+objects)*' '
+                              when :uno then (objects+[shared_dir('lib/libarduino-core.a')])*' '
                               end
                 cmds << "#{linker_cmd} #{options_cmd} -o #{fn} #{objects_cmd} #{lib_sp_cli} #{lib_cli}"
                 case @arch
@@ -85,13 +85,12 @@ module Build
                     avrdude_conf = ''
                     cmds << "avrdude #{avrdude_conf} -v -patmega328p -carduino -P/dev/ttyACM0 -b115200 -D -Uflash:w:#{fn}.hex:i"
                 end
-                cmds
             when :lib then
                 ar_cmd = case @arch
                              when NilClass then "ar"
                              when :uno then "avr-gcc-ar"
                              end
-                "#{ar_cmd} rcs #{fn} #{objects*' '}"
+                cmds << "#{ar_cmd} rcs #{fn} #{objects*' '}"
             else raise("Unknown link type #{type}") end
 
             cmds
