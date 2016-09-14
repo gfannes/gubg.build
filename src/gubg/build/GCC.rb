@@ -62,7 +62,10 @@ module Build
         end
         def compile_command(object, source, type)
             add_arch_settings_()
-            default_std = (GCC.version >= 49 ? 'c++14' : 'c++11')
+            v = GCC.version
+            default_std = if (v < 49) then 'c++11'
+                          elsif (v <= 53) then 'c++14'
+                          else 'c++17' end
             cpp_standard_cmd = "-std=#{@cpp_standard || default_std}"
             compiler_cmd = case @arch
                            when :default
