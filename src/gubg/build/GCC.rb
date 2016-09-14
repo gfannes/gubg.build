@@ -2,10 +2,14 @@ require('gubg/build/Compiler.rb')
 
 module Build
     class GCC < Compiler
-        def GCC.version()
+        def version()
             return @version_ if @version_
+            exe = case @arch
+                  when :default then 'gcc'
+                  when :uno, :lilypad then 'avr-gcc'
+                  else raise("Unknown #{@arch}") end
             re = /(\d+)\.(\d+)\.(\d+)( \d\d\d\d\d\d\d\d)?$/
-            output = `gcc --version`.split("\n")[0]
+            output = `#{exe} --version`.split("\n")[0]
             if md = re.match(output)
                 @version_ = md[1].to_i*10+md[2].to_i
             else
@@ -58,11 +62,11 @@ module Build
             "lib#{name}.a"
         end
         def color_cmd()
-            (GCC.version >= 49 ? '-fdiagnostics-color' : '')
+            (version() >= 49 ? '-fdiagnostics-color' : '')
         end
         def compile_command(object, source, type)
             add_arch_settings_()
-            v = GCC.version
+            v = version()
             default_std = if (v < 49) then 'c++11'
                           elsif (v <= 53) then 'c++14'
                           else 'c++17' end
