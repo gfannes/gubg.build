@@ -73,7 +73,7 @@ module Build
             cpp_standard_cmd = "-std=#{@cpp_standard || default_std}"
             compiler_cmd = case @arch
                            when :default
-                               {cpp: "g++ #{cpp_standard_cmd} -c", c: "gcc -c"}
+                               {cpp: "g++ #{cpp_standard_cmd} -c -fsanitize=address -fno-omit-frame-pointer", c: "gcc -c"}
                            when :uno, :lilypad
                                {
                                    cpp: "avr-g++ -c -g -Os -w #{cpp_standard_cmd} -fpermissive -fno-exceptions -ffunction-sections -fdata-sections",
@@ -101,7 +101,7 @@ module Build
             case type
             when :exe then
                 linker_cmd = case @arch
-                             when :default then "g++ #{color_cmd}"
+                             when :default then "g++ #{color_cmd} -fsanitize=address"
                              when :uno then "avr-gcc #{color_cmd} -w -Os -flto -fuse-linker-plugin -Wl,--gc-sections -mmcu=atmega328p"
                              when :lilypad then "avr-gcc #{color_cmd} -w -Os -flto -fuse-linker-plugin -Wl,--gc-sections -mmcu=atmega32u4"
                              end
