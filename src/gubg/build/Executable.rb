@@ -51,7 +51,7 @@ module Build
 
         def add_sources(sources)
             expand_(sources).each do |fn|
-                #puts("Adding #{fn}")
+                # puts("Adding #{fn}")
                 case fn
                 when @@re_cpp then @filenames_per_type[:cpp] << fn
                 when @@re_hpp then @filenames_per_type[:hpp] << fn
@@ -172,14 +172,18 @@ module Build
                 end
             end
             namespace namespace_name_ do
-                multitask :compile => object_fns
+                multitask :compile => object_fns do
+                    do_link = true
+                end
                 task :link => settings_fn do
+                    # puts("Linking")
                     link_cmds.each do |link_cmd|
                         sh link_cmd
                     end
                     FileUtils.install(cached_exe_fn, @exe_fn)
                 end
                 file @exe_fn => :compile do
+                    # puts("Building #{@exe_fn} #{do_link}")
                     Rake::Task[namespace_name_(:link)].invoke if do_link
                 end
                 task :clean do
