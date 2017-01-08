@@ -205,7 +205,7 @@ module Build
             create_rules
             Rake::Task[@exe_fn].invoke()
         end
-        def run(options = nil)
+        def run(*options)
             build
             sh "./#{@exe_fn}", *([options].flatten.compact)
         end
