@@ -33,6 +33,8 @@ module Build
                 @defines << 'ARDUINO=10610'
                 @defines << 'ARDUINO_ARCH_AVR'
                 @include_paths << GUBG::shared('extern/Arduino-master/hardware/arduino/avr/cores/arduino')
+                @include_paths << GUBG::shared('extern/Arduino-master/libraries/Servo/src')
+
 
                 variant = nil
                 case @arch
