@@ -5,8 +5,8 @@ module Build
         def version()
             return @version_ if @version_
             exe = case @arch
-                  when :default then 'gcc'
-                  when :uno, :lilypad then 'avr-gcc'
+                  when :default then 'g++'
+                  when :uno, :lilypad then 'avr-g++'
                   else raise("Unknown #{@arch}") end
             re = /(\d+)\.(\d+)\.(\d+)( \d\d\d\d\d\d\d\d)?$/
             output = `#{exe} --version`.split("\n")[0]
