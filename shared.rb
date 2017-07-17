@@ -1,6 +1,5 @@
 require('fileutils')
 require('digest/md5')
-require_relative("src/gubg/tree/Parser")
 
 module GUBG
     def self.shared(*parts)
@@ -33,6 +32,8 @@ module GUBG
     class MissingSubmoduleError < StandardError
     end
     def self.each_submod(na = {submods: nil}, &block)
+        require("gubg/tree/Parser")
+
         submods = na[:submods]
 
         infos = []
