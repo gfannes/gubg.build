@@ -35,14 +35,17 @@ module GUBG
         require("gubg/tree/Parser")
 
         submods = na[:submods]
+        puts("#{submods}")
 
         infos = []
         info = nil
         p = GUBG::Tree::Parser.new(
-            node: ->(name){
+            node: ->(tag){
+                name = tag[/submodule "(.+)"/, 1]
                 info = if (!submods || submods.include?(name))
-                           {name: name[/submodule "(.+)"/, 1]}
+                           {name: name}
                        else
+                           puts("Skipping submodule \"#{name}\"")
                            nil
                        end
             },
