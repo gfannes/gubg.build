@@ -35,7 +35,6 @@ module GUBG
         require("gubg/tree/Parser")
 
         submods = na[:submods]
-        puts("#{submods}")
 
         infos = []
         info = nil
