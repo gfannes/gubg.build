@@ -39,7 +39,7 @@ module GUBG
         info = nil
         p = GUBG::Tree::Parser.new(
             node: ->(name){
-                info = if submods.include?(name)
+                info = if (!submods || submods.include?(name))
                            {name: name[/submodule "(.+)"/, 1]}
                        else
                            nil
