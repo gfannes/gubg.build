@@ -32,20 +32,26 @@ module GUBG
 
     class MissingSubmoduleError < StandardError
     end
-    def self.each_submod(na = {submods = nil}, &block)
+    def self.each_submod(na = {submods: nil}, &block)
         submods = na[:submods]
 
         infos = []
         info = nil
         p = GUBG::Tree::Parser.new(
-            node: ->(){},
-            attr: ->(){},
-            attr_done: ->(){},
-            node_done: ->(){},
+            node: ->(name){ info = {name: name[/submodule "(.+)"/, 1]} },
+            text: ->(text){
+                text.each_line do |line|
+                    if md = /\s*([^\s]+)\s*=\s*([^\s]+)\s*/.match(line)
+                        key, value = md[1], md[2]
+                        case key
+                        when "branch" then info[:branch] = value
+                        end
+                    end
+                end
+            },
+            node_done: ->(){ infos << info },
         )
         p.process(File.read(".gitmodules"))
-
-        raise("stop")
 
         infos.flatten.each do |info|
             raise(MissingSubmoduleError, "Could not find rakefile.rb in #{info[:name]}, did you check it out?") unless File.exist?(File.join(info[:name], 'rakefile.rb'))
