@@ -38,7 +38,13 @@ module GUBG
         infos = []
         info = nil
         p = GUBG::Tree::Parser.new(
-            node: ->(name){ info = {name: name[/submodule "(.+)"/, 1]} },
+            node: ->(name){
+                info = if submods.include?(name)
+                           {name: name[/submodule "(.+)"/, 1]}
+                       else
+                           nil
+                       end
+            },
             text: ->(text){
                 text.each_line do |line|
                     if md = /\s*([^\s]+)\s*=\s*([^\s]+)\s*/.match(line)
@@ -47,9 +53,9 @@ module GUBG
                         when "branch" then info[:branch] = value
                         end
                     end
-                end
+                end if info
             },
-            node_done: ->(){ infos << info },
+            node_done: ->(){ infos << info if info },
         )
         p.process(File.read(".gitmodules"))
 
