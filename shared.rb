@@ -1,5 +1,6 @@
 require('fileutils')
 require('digest/md5')
+require_relative("src/gubg/tree/Parser")
 
 module GUBG
     def self.shared(*parts)
@@ -31,14 +32,28 @@ module GUBG
 
     class MissingSubmoduleError < StandardError
     end
-    def self.each_submod(submods, &block)
-        [submods].flatten.each do |submod|
-            raise(MissingSubmoduleError, "Could not find rakefile.rb in #{submod}, did you check it out?") unless File.exist?(File.join(submod, 'rakefile.rb'))
-            puts(">>>> #{submod}")
-            Dir.chdir(submod) do
-                yield(submod)
+    def self.each_submod(na = {submods = nil}, &block)
+        submods = na[:submods]
+
+        infos = []
+        info = nil
+        p = GUBG::Tree::Parser.new(
+            node: ->(){},
+            attr: ->(){},
+            attr_done: ->(){},
+            node_done: ->(){},
+        )
+        p.process(File.read(".gitmodules"))
+
+        raise("stop")
+
+        infos.flatten.each do |info|
+            raise(MissingSubmoduleError, "Could not find rakefile.rb in #{info[:name]}, did you check it out?") unless File.exist?(File.join(info[:name], 'rakefile.rb'))
+            puts(">>>> #{info[:name]}")
+            Dir.chdir(info[:name]) do
+                yield(info)
             end
-            puts("<<<< #{submod}\n\n")
+            puts("<<<< #{info[:name]}\n\n")
         end
     end
     def each_submod(submods, &block)
