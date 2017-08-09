@@ -17,6 +17,8 @@ task :clean do
     Rake::Task['test:clean'].invoke
 end
 
+task :prepare
+
 task :declare do
     publish('shared.rb')
     publish('src', pattern: '**/*.rb', dst: 'ruby')
