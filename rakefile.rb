@@ -7,25 +7,20 @@ rescue LoadError
 end
 include GUBG
 
-task :default => :help
-task :help do
-    puts('declare: copy all scripts and headers to GUBG::shared')
-    puts('define: build and copy libraries and executables to GUBG::shared')
+task :default do
+    sh "rake -T"
 end
 
 task :clean do
     Rake::Task['test:clean'].invoke
 end
 
-task :prepare
-
-task :declare do
+desc "Install all scripts"
+task :prepare do
     publish('shared.rb')
     publish('src', pattern: '**/*.rb', dst: 'ruby')
 end
-
-task :define => :declare do
-end
+task :run
 
 task :test do
     Rake::Task['test:build'].invoke

@@ -29,6 +29,15 @@ module GUBG
         GUBG::shared_dir(*parts)
     end
 
+    def self.mkdir(*parts)
+        dir = File.join(*parts.compact)
+        FileUtils.mkdir_p(dir) unless File.exist?(dir)
+        dir
+    end
+    def mkdir(*parts)
+        GUBG::mkdir(*parts)
+    end
+
     class MissingSubmoduleError < StandardError
     end
     def self.each_submod(na = {submods: nil}, &block)
