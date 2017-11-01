@@ -92,7 +92,7 @@ module GUBG
     end
 
     def self.publish(src, na = {pattern: nil, dst: nil, mode: nil}, &block)
-        dst = shared(na[:dst])
+        dst = shared_dir(na[:dst])
         if File.directory?(src)
             patterns = [na[:pattern] || '*'].flatten
             Dir.chdir(src) do
