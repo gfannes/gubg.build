@@ -8,12 +8,12 @@ module Build
                   when :default then 'g++'
                   when :uno, :lilypad then 'avr-g++'
                   else raise("Unknown #{@arch}") end
-            re = /(\d+)\.(\d+)\.(\d+)( \d\d\d\d\d\d\d\d)?$/
+            re = /(\d+)\.(\d+)\.(\d+)( \d\d\d\d\d\d\d\d)?/
             output = `#{exe} --version`.split("\n")[0]
             if md = re.match(output)
                 @version_ = md[1].to_i*10+md[2].to_i
             else
-                raise("Could not parse version from #{output}")
+                raise("Could not parse version from (#{output})")
             end
             return @version_
         end
