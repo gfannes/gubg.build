@@ -9,7 +9,6 @@ module GUBG
             prefix = nil
             p = Naft::Parser.new(
                 node: ->(tag){
-                    puts "tag: #{tag}"
                     case tag
                     when "output" then tags << :output
                     end
@@ -20,24 +19,20 @@ module GUBG
                     items << {type: :txt, data: "[#{tag}]"}
                 },
                 node_done: ->(){
-                    puts "tag closed"
                     if tags == [:output]
                         items << {type: :txt, data: "#{prefix}}"}
                     end
                     tags.pop
                 },
                 text: ->(txt){
-                    puts "txt: #{txt}"
                     if tags == [:output]
                         #Eat this text
                     else
                         prefix = txt.split("\n").last
-                        puts "prefix: #{prefix}"
                         items << {type: :txt, data: txt}
                     end
                 },
                 attr: ->(key,value){
-                    puts "key: #{key}, value: #{value}"
                     if tags == [:output]
                         case key
                         when "script" then info[:script] = value
