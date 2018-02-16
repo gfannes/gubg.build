@@ -3,7 +3,6 @@ require("gubg/naft/Parser")
 module GUBG
     module Build
         def self.expand_templates(fn)
-            puts ">>"
             items = []
             tags = []
             info = nil
@@ -65,15 +64,18 @@ module GUBG
                     oss.print(output.string)
                 end
             end
-            puts "```#{oss.string}```"
 
-            puts "<<"
+            File.write(fn, oss.string)
         end
     end
 end
 
 if __FILE__ == $0
     #[output](script:3.times{|i|output.puts("puts #{i}")}){
+puts 0
+puts 1
+puts 2
     #}
+
     GUBG::Build::expand_templates(__FILE__)
 end
