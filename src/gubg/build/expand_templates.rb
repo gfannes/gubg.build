@@ -22,7 +22,7 @@ module GUBG
                 node_done: ->(){
                     puts "tag closed"
                     if tags == [:output]
-                        items << {type: :txt, data: "#{prefix}}\n"}
+                        items << {type: :txt, data: "#{prefix}}"}
                     end
                     tags.pop
                 },
@@ -76,6 +76,5 @@ puts 0
 puts 1
 puts 2
     #}
-
     GUBG::Build::expand_templates(__FILE__)
 end
