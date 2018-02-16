@@ -35,7 +35,7 @@ module GUBG
                 attr: ->(key,value){
                     if tags == [:output]
                         case key
-                        when "script" then info[:script] = value
+                        when "script" then info[:script] = value.split("\n").map{|line|line[0,prefix.size]==prefix ? line[prefix.size,line.size] : line}*"\n"
                         end
                     end
                     items << {type: :txt, data: "(#{key}#{value ? ":" : ""}#{value})"}
@@ -55,7 +55,13 @@ module GUBG
                 when :txt then oss.print(item[:data])
                 when :script
                     output = StringIO.new
-                    eval(item[:data])
+                    begin
+                        eval(item[:data])
+                    rescue
+                        puts("ERROR: Failed to execute following snippet:")
+                        puts(item[:data])
+                        raise("stop")
+                    end
                     oss.print(output.string)
                 end
             end
