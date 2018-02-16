@@ -1,12 +1,12 @@
 module GUBG
-    module Tree
+    module Naft
         class Parser
             def initialize(event_points = {node: nil, attr: nil, attr_done: nil, text: nil, node_done: nil})
                 @event_points = {
-                    node: event_points[:node] || ->(){},
-                    attr: event_points[:attr] || ->(){},
+                    node: event_points[:node] || ->(tag){},
+                    attr: event_points[:attr] || ->(key, value){},
                     attr_done: event_points[:attr_done] || ->(){},
-                    text: event_points[:text] || ->(){},
+                    text: event_points[:text] || ->(text){},
                     node_done: event_points[:node_done] || ->(){},
                 }
 
@@ -91,19 +91,22 @@ module GUBG
                         @key, @value = "", nil
                     },
                     exit: ->(){
-                        @event_points[:attr].call(@key, @value || "")
+                        @event_points[:attr].call(@key, @value)
                     },
                     process: ->(ch){
                         case ch
                         when ":"
-                            @value = "" if !@value
-                            return
+                            if !@value
+                                @value = ""
+                                return
+                            end
                         when "("
                             @bracket_level += 1
                         when ")"
                             return change_state_(@text) if @bracket_level == 0
                             @bracket_level -= 1
                         end
+
                         if @value
                             @value << ch
                         else
