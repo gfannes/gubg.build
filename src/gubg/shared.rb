@@ -175,7 +175,3 @@ module GUBG
         GUBG::which(program, &block)
     end
 end
-
-$LOAD_PATH << GUBG::shared('ruby')
-#To be able to require "gubg/tree/Parser.rb"
-$LOAD_PATH << File.join(File.dirname(__FILE__), 'src')
