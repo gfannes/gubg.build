@@ -1,5 +1,5 @@
 module GUBG
-    module Ratch
+    module Catch
         class TestCase
             attr(:name)
             def initialize(name, &block)
@@ -96,27 +96,27 @@ module GUBG
             @test_cases << TestCase.new(name, &block)
         end
         def test_case(name, &block)
-            Ratch::test_case(name, &block)
+            Catch::test_case(name, &block)
         end
 
         def self.section(name, &block)
             @current_test_case.section(name, &block)
         end
         def section(name, &block)
-            Ratch::section(name, &block)
+            Catch::section(name, &block)
         end
 
         def self.must(expr)
             @current_test_case.must(expr)
         end
         def must(expr)
-            Ratch::must(expr)
+            Catch::must(expr)
         end
         def self.must_eq(actual, wanted)
             @current_test_case.must_eq(actual, wanted)
         end
         def must_eq(actual, wanted)
-            Ratch::must_eq(actual, wanted)
+            Catch::must_eq(actual, wanted)
         end
 
         def self.run(filter = nil)

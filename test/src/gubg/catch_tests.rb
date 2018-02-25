@@ -1,5 +1,5 @@
 require("gubg/catch")
-include GUBG::Ratch
+include GUBG::Catch
 
 test_case("aaa") do
     scn = {}
