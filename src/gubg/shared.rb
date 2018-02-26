@@ -41,13 +41,13 @@ module GUBG
     class MissingSubmoduleError < StandardError
     end
     def self.each_submod(na = {submods: nil}, &block)
-        require("gubg/tree/Parser")
+        require("gubg/naft/Parser")
 
         submods = na[:submods]
 
         infos = []
         info = nil
-        p = GUBG::Tree::Parser.new(
+        p = GUBG::Naft::Parser.new(
             node: ->(tag){
                 name = tag[/submodule "(.+)"/, 1]
                 info = if (!submods || submods.include?(name))
