@@ -16,8 +16,10 @@ task :prepare  do
     dir = GUBG::mkdir("generated/ninja")
     case GUBG::os
     when :windows
-    	sh "unzip extern/ninja-v1.8.2-win.zip -d #{dir}"
-    	GUBG::publish(dir, pattern: "*.exe", dst: "bin")
+    	unless File.exist?("#{dir}/ninja.exe")
+    		sh "unzip extern/ninja-v1.8.2-win.zip -d #{dir}"
+    		GUBG::publish(dir, pattern: "*.exe", dst: "bin")
+    	end
     end
 end
 
