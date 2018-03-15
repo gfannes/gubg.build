@@ -11,8 +11,14 @@ task :default do
 end
 
 desc "Install all scripts"
-task :prepare do
+task :prepare  do
     GUBG::publish('src', pattern: '**/*.rb', dst: 'ruby')
+    dir = GUBG::mkdir("generated/ninja")
+    case GUBG::os
+    when :windows
+    	sh "unzip extern/ninja-v1.8.2-win.zip -d #{dir}"
+    	GUBG::publish(dir, pattern: "*.exe", dst: "bin")
+    end
 end
 
 task :run
