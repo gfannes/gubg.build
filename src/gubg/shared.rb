@@ -30,7 +30,7 @@ module GUBG
     end
 
     def self.mkdir(*parts)
-        dir = File.join(*parts.compact)
+        dir = File.join(*parts.compact.map{|e|e.to_s})
         FileUtils.mkdir_p(dir) unless File.exist?(dir)
         dir
     end
