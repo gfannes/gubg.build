@@ -153,7 +153,7 @@ module GUBG
     def self.os()
         case RUBY_PLATFORM
         when /mingw/ then :windows
-        when /darwin/ then :osx
+        when /darwin/ then :macos
         else :linux
         end
     end
@@ -163,7 +163,7 @@ module GUBG
 
     def self.which(program, &block)
         path = case os
-               when :linux, :osx then `which #{program}`
+               when :linux, :macos then `which #{program}`
                when :windows then `where #{program}`
                else raise("Unknown os #{os}") end
         path.chomp!
