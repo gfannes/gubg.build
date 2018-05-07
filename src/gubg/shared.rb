@@ -72,7 +72,7 @@ module GUBG
         p.process(File.read(".gitmodules"))
 
         infos.flatten.each do |info|
-            raise(MissingSubmoduleError, "Could not find rakefile.rb in #{info[:name]}, did you check it out?") unless File.exist?(File.join(info[:name], 'rakefile.rb'))
+            raise(MissingSubmoduleError, "Could not find readme.md or rakefile.rb in #{info[:name]}, did you check it out?") unless (%w[readme.md rakefile.rb].any?{|fn|File.exist?(File.join(info[:name], fn))})
             puts(">>>> #{info[:name]}")
             Dir.chdir(info[:name]) do
                 yield(info)
