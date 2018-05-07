@@ -72,8 +72,8 @@ module GUBG
         p.process(File.read(".gitmodules"))
 
         infos.flatten.each do |info|
-            raise(MissingSubmoduleError, "Could not find readme.md or rakefile.rb in #{info[:name]}, did you check it out?") unless (%w[readme.md rakefile.rb].any?{|fn|File.exist?(File.join(info[:name], fn))})
             puts(">>>> #{info[:name]}")
+            sh("git submodule update --init #{info[:name]}") if Dir[File.join(info[:name], "*")].empty?
             Dir.chdir(info[:name]) do
                 yield(info)
             end
