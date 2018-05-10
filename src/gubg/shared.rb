@@ -73,7 +73,7 @@ module GUBG
 
         infos.flatten.each do |info|
             puts(">>>> #{info[:name]}")
-            sh("git submodule update --init #{info[:name]}") if Dir[File.join(info[:name], "*")].empty?
+            Rake.sh("git submodule update --init #{info[:name]}") if Dir[File.join(info[:name], "*")].empty?
             Dir.chdir(info[:name]) do
                 yield(info)
             end
