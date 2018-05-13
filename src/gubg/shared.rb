@@ -174,4 +174,34 @@ module GUBG
     def which(program, &block)
         GUBG::which(program, &block)
     end
+
+    def self.sandbox(na = {chdir: nil}, &block)
+        base = case os
+               when :linux, :macos then "/tmp/gubg/sandbox"
+               when :windows then "C:\\temp\\gubg\\sandbox"
+               else raise("Unknown os #{os}") end
+
+        dir, ix = nil, 0
+        loop do
+            dir = "#{base}_#{ix}"
+            break unless File.exist?(dir)
+            puts("Sandbox #{dir} already exists")
+            ix += 1
+        end
+
+        chdir = na[:chdir]||false
+        GUBG::mkdir(dir)
+        if chdir
+            Dir.chdir(dir) do
+                block.call(dir)
+            end
+        else
+            block.call(dir)
+        end
+        puts "Removing #{dir}"
+        FileUtils.rm_rf(dir)
+    end
+    def sandbox(na = {chdir: nil}, &block)
+        GUBG::sandbox(na, &block)
+    end
 end
