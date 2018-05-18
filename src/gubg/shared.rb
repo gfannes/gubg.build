@@ -99,7 +99,7 @@ module GUBG
                 patterns.each do |pattern|
                     FileList.new(pattern).each do |fn|
                         dst_fn = File.join(dst, fn)
-                        new_fn = (block_given? ? yield(dst_fn) : dst_fn)
+                        new_fn = (block_given? ? block.call(dst_fn) : dst_fn)
                         if File.directory?(fn)
                             # puts("\"#{fn}\" is a directory, I will not publish this.") unless File.exist?(dst_fn)
                         else
@@ -116,7 +116,7 @@ module GUBG
             end
         else
             dst_fn = File.join(dst, src)
-            new_fn = (block_given? ? yield(dst_fn) : dst_fn)
+            new_fn = (block_given? ? block.call(dst_fn) : dst_fn)
             dst_dir = File.dirname(dst_fn)
             FileUtils.mkdir_p(dst_dir) unless File.exist?(dst_dir)
             if (!File.exist?(new_fn) or !FileUtils.identical?(src, new_fn))
