@@ -1,4 +1,5 @@
 require("gubg/naft/Parser")
+require("stringio")
 
 module GUBG
     module Build
