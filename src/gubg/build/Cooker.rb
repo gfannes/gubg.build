@@ -30,7 +30,6 @@ module GUBG
                 cmd << " -O #{tmpdir*"/"}"
                 cmd << " -o #{@output_dir}" if @output_dir
                 @recipes.each{|rcp|cmd << " #{rcp}"}
-                puts cmd
                 Rake::sh cmd
             end
             def ninja()
