@@ -31,16 +31,20 @@ module GUBG
                 cmd << " -o #{@output_dir}" if @output_dir
                 @recipes.each{|rcp|cmd << " #{rcp}"}
                 Rake::sh cmd
+                self
             end
             def ninja()
                 Rake::sh "ninja -v"
+                self
             end
-            def run(args)
+            def run(args = nil)
                 @recipes.each do |rcp|
                     exe_fn = rcp.gsub(/^\//, "").gsub("/", ".")
                     exe_fn = "./#{exe_fn}" unless GUBG::os == :windows
+                    puts exe_fn
                     Rake::sh "#{exe_fn} #{args}"
                 end
+                self
             end
         end
     end
