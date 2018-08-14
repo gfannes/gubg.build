@@ -9,12 +9,15 @@ module GUBG
 
             def option(key, value=nil)
                 @options << {key: key, value: value}
+                self
             end
             def output(dir)
                 @output_dir = dir
+                self
             end
             def recipe(rcp)
                 @recipes << rcp
+                self
             end
 
             def generate(generator, *recipes)
