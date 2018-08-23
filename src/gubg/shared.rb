@@ -63,6 +63,7 @@ module GUBG
                         key, value = md[1], md[2]
                         case key
                         when "branch" then info[:branch] = value
+                        when "path" then info[:path] = value
                         end
                     end
                 end if info
@@ -73,8 +74,9 @@ module GUBG
 
         infos.flatten.each do |info|
             puts(">>>> #{info[:name]}")
-            Rake.sh("git submodule update --init #{info[:name]}") if Dir[File.join(info[:name], "*")].empty?
-            Dir.chdir(info[:name]) do
+            path = info[:path]
+            Rake.sh("git submodule update --init #{path}") if Dir[File.join(path, "*")].empty?
+            Dir.chdir(path) do
                 yield(info)
             end
             puts("<<<< #{info[:name]}\n\n")
