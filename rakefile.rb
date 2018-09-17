@@ -17,9 +17,13 @@ task :prepare  do
     case GUBG::os
     when :windows
         ninja_fn = "#{dir}/ninja.exe"
-        sh("unzip extern/ninja-v1.8.2-win.zip -d #{dir}") unless File.exist?(ninja_fn)
+        sh("unzip archive/ninja-v1.8.2-win.zip -d #{dir}") unless File.exist?(ninja_fn)
         GUBG::publish(dir, pattern: "*.exe", dst: "bin") if File.exist?(ninja_fn)
     end
 end
 
 task :run
+
+task :proper do
+    rm_rf "generated"
+end
