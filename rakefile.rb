@@ -24,6 +24,8 @@ end
 
 task :run
 
+task :clean
+
 task :proper do
     rm_rf "generated"
 end
