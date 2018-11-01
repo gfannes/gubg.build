@@ -36,8 +36,10 @@ module GUBG
                 Rake::sh cmd
                 self
             end
-            def ninja()
-                Rake::sh "ninja -v"
+            def ninja(j = nil)
+                v_str = " -v"
+                j_str = (j ? " -j #{j}" : "")
+                Rake::sh "ninja#{v_str}#{j_str}"
                 self
             end
             def run(args = nil)
