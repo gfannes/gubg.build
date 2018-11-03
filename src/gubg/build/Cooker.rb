@@ -15,6 +15,13 @@ module GUBG
                 @output_dir = dir
                 self
             end
+            def output_fn(*parts)
+                if @output_dir
+                    File.join(@output_dir, *parts)
+                else
+                    File.join(*parts)
+                end
+            end
             def recipe(rcp)
                 @recipes << rcp
                 self
@@ -37,14 +44,15 @@ module GUBG
                 self
             end
             def ninja(j = nil)
+                f_str = " -f #{output_fn("build.ninja")}"
                 v_str = " -v"
                 j_str = (j ? " -j #{j}" : "")
-                Rake::sh "ninja#{v_str}#{j_str}"
+                Rake::sh "ninja#{f_str}#{v_str}#{j_str}"
                 self
             end
             def run(args = nil)
                 @recipes.each do |rcp|
-                    exe_fn = rcp.gsub(/^\//, "").gsub("/", ".")
+                    exe_fn = output_fn(rcp.gsub(/^\//, "").gsub("/", "."))
                     exe_fn = "./#{exe_fn}" unless GUBG::os == :windows
                     puts exe_fn
                     Rake::sh "#{exe_fn} #{args}"
