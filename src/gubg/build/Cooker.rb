@@ -50,12 +50,11 @@ module GUBG
                 Rake::sh "ninja#{f_str}#{v_str}#{j_str}"
                 self
             end
-            def run(args = nil)
+            def run(*args)
                 @recipes.each do |rcp|
                     exe_fn = output_fn(rcp.gsub(/^\//, "").gsub("/", "."))
                     exe_fn = "./#{exe_fn}" unless GUBG::os == :windows
-                    puts exe_fn
-                    Rake::sh "#{exe_fn} #{args}"
+                    Rake::sh(exe_fn, *args.map{|e|e.to_s})
                 end
                 self
             end
