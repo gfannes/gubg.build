@@ -33,7 +33,7 @@ module GUBG
 
                 # run the ninja
                 ninja_fn = File.join(build_dir, "build.ninja")
-                Rake.sh("ninja -f #{ninja_fn}")
+                Rake.sh("ninja -f #{ninja_fn} -j 8")
                 
                 
             end
