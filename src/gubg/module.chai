@@ -1,0 +1,42 @@
+class Module
+{
+    def Module(uri, dir)
+    {
+        this.uri = Uri(uri.to_string)
+        this.book = cook[this.uri]
+        
+        {
+            var r = this.recipe("func")
+            r.add("src", "**.[hc]pp")
+        }
+
+        {
+            var r = this.recipe("ut", TargetType.Executable)
+            r.add("test/src", "**.[hc]pp")
+            this.add_dependencies("ut", ["func", "catch/main"])
+        }
+    }
+
+    def Module(uri)
+    {
+        Module(uri, cook.script_local_directory())
+    }
+
+    def recipe(uri)
+    {
+        return this.book.recipe(uri)
+    }
+
+    def recipe(uri, type)
+    {
+        return this.book.recipe(uri, type)
+    }
+
+    def add_dependencies(suburi, lst)
+    {
+        for(d : lst) {
+            this.recipe(suburi).depends_on(d)
+        }
+    }
+}
+
