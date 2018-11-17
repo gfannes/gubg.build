@@ -25,8 +25,12 @@ module GUBG
 
             def build(uri_or_globs)
                 exprs = [uri_or_globs].flatten.compact
-                uris = exprs.map { |u| naft.match(u) }
-                uris = uris.flatten
+                uris = []
+                exprs.each do  |u| 
+                    res = naft.match(u) 
+                    raise "No recipe matching expression #{u}}" if res.empty?
+                    uris += res
+                end
 
                 # make ninja
                 Rake.sh(*cmd("-g", "ninja", *uris))
@@ -34,12 +38,18 @@ module GUBG
                 # run the ninja
                 ninja_fn = File.join(build_dir, "build.ninja")
                 Rake.sh("ninja -f #{ninja_fn} -j 8")
-                
-                
+
+                result = {}
+                uris.each do |uri|
+                    recipe = naft.recipe(uri)
+                    result[uri] = File.join(build_dir, recipe.target[:filename])
+                end
+
+                result
             end
 
             def cmd(*args)
-            
+
                 res = []
                 res << @cook_executable
                 rcps = [GUBG::Build::root_dir("recipes.chai")] + @additional_recipes
@@ -52,7 +62,7 @@ module GUBG
             def options()
                 return ""
             end
-            
+
         end
     end
 end
