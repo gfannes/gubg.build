@@ -1,6 +1,6 @@
 class Module
 {
-    def Module(uri, dir)
+    def Module(uri)
     {
         this.uri = Uri(uri.to_string)
         this.book = cook[this.uri]
@@ -15,11 +15,6 @@ class Module
             r.add("test/src", "**.[hc]pp")
             this.add_dependencies("ut", ["func", "catch/main"])
         }
-    }
-
-    def Module(uri)
-    {
-        Module(uri, cook.script_local_directory())
     }
 
     def recipe(uri)
