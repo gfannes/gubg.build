@@ -48,7 +48,9 @@ module GUBG
                 result = {}
                 uris.each do |uri|
                     recipe = naft.recipe(uri)
-                    result[uri] = File.join(build_dir, recipe.target[:filename])
+                    fn = recipe.target[:filename] || ""
+                    fn = File.join(build_dir, fn) unless fn.empty?
+                    result[uri] = fn
                 end
 
                 result
