@@ -23,7 +23,8 @@ module GUBG
                 @naft
             end
 
-            def build(uri_or_globs)
+            def expand(uri_or_globs)
+                uri_or_globs = "**" if !uri_or_globs
                 exprs = [uri_or_globs].flatten.compact
                 uris = []
                 exprs.each do  |u| 
@@ -31,6 +32,11 @@ module GUBG
                     raise "No recipe matching expression #{u}}" if res.empty?
                     uris += res
                 end
+                uris
+            end
+
+            def build(uri_or_globs)
+                uris = expand(uri_or_globs)
 
                 # make ninja
                 Rake.sh(*cmd("-g", "ninja", *uris))
