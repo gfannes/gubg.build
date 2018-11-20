@@ -1,0 +1,12 @@
+if (my(OS) == OS.Linux || my(OS) == OS.MacOS) {
+    for(s : [TargetType.SharedLibrary, TargetType.Executable]) {
+        var linker = cook.toolchain.element(ElementType.Link, Language.Binary, s)
+        var & tm = linker.translators()
+        tm[Part.Library] = fun(k,v) 
+        { 
+            if(k.empty) { return "" }
+            else if (k[0] == '-') { return k }
+            else { return "-l${k}" }
+        }
+    }
+}
