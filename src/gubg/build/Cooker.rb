@@ -2,15 +2,25 @@ module GUBG
     module Build
         class Cooker
             def initialize()
+                @toolchains = []
                 @options = []
                 @output_dir = nil
+                @recipes_fns = []
                 @recipes = []
+            end
+
+            def toolchain(*str_or_fn)
+                [str_or_fn].flatten.each do |str_or_fn|
+                    @toolchains << str_or_fn
+                end
+                self
             end
 
             def option(key, value=nil)
                 @options << {key: key, value: value}
                 self
             end
+
             def output(dir)
                 @output_dir = dir
                 self
@@ -22,6 +32,14 @@ module GUBG
                     File.join(*parts)
                 end
             end
+
+            def recipes_fn(*fn)
+                [fn].flatten.each do |fn|
+                    @recipes_fns << fn
+                end
+                self
+            end
+
             def recipe(rcp)
                 @recipes << rcp
                 self
@@ -31,6 +49,9 @@ module GUBG
                 recipes.each{|rcp|recipe(rcp)}
 
                 cmd = "cook -g #{generator}"
+                @toolchains.each do |str_or_fn|
+                    cmd << " -t #{str_or_fn}"
+                end
                 tmpdir = [".cook"]
                 @options.each do |opt|
                     ary = [:key, :value].map{|sym|opt[sym]}.compact
@@ -39,6 +60,9 @@ module GUBG
                 end
                 cmd << " -O #{tmpdir*"/"}"
                 cmd << " -o #{@output_dir}" if @output_dir
+                @recipes_fns.each do |fn|
+                    cmd << " -f #{fn}"
+                end
                 @recipes.each{|rcp|cmd << " #{rcp}"}
                 Rake::sh cmd
                 self
