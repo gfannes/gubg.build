@@ -5,7 +5,7 @@ module GUBG
         def self.load_compiler(arch)
             msvc, msvc_version = nil
             begin
-                base = "c:/Program Files (x86)/Microsoft Visual Studio/2017/Community"
+                base = "c:/Program Files (x86)/Microsoft Visual Studio/2019/Community"
                 msvc = {
                     base: base,
                     vc: "#{base}/VC",
