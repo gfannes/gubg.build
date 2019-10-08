@@ -93,6 +93,7 @@ module GUBG
         GUBG::md5sum(fn)
     end
 
+    #The passed block allows you to change the destination filename
     def self.publish(src, na = {pattern: nil, dst: nil, mode: nil}, &block)
         dst = shared_dir(na[:dst])
         if File.directory?(src)
