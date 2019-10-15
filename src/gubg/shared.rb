@@ -1,4 +1,5 @@
 require('fileutils')
+require('pathname')
 require('digest/md5')
 
 module GUBG
@@ -95,7 +96,8 @@ module GUBG
 
     #The passed block allows you to change the destination filename
     def self.publish(src, na = {pattern: nil, dst: nil, mode: nil}, &block)
-        dst = shared_dir(na[:dst])
+      dst = na[:dst] || shared_dir()
+      dst = shared_dir(dst) unless Pathname.new(dst).absolute?
         if File.directory?(src)
             patterns = [na[:pattern] || '*'].flatten
             Dir.chdir(src) do
