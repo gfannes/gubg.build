@@ -30,6 +30,20 @@ module GUBG
         GUBG::shared_dir(*parts)
     end
 
+    def self.home(*parts)
+        File.join(ENV['HOME'], *parts.compact)
+    end
+    def self.home_file(*parts)
+        fn = self.home(*parts)
+        raise("File \"#{fn}\" does not exist") unless File.exist?(fn)
+        fn
+    end
+    def self.home_dir(*parts)
+        dir = self.home(*parts)
+        FileUtils.mkdir_p(dir) unless File.exist?(dir)
+        dir
+    end
+
     def self.mkdir(*parts)
         dir = File.join(*parts.compact.map{|e|e.to_s})
         FileUtils.mkdir_p(dir) unless File.exist?(dir)
