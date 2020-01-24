@@ -82,6 +82,14 @@ module GUBG
                 end
                 self
             end
+            def debug(*args)
+                @recipes.each do |rcp|
+                    exe_fn = output_fn(rcp.gsub(/^\//, "").gsub("/", "."))
+                    exe_fn = "./#{exe_fn}" unless GUBG::os == :windows
+                    Rake::sh("nemiver", exe_fn, *[args].flatten.map{|e|e.to_s})
+                end
+                self
+            end
         end
     end
 end
