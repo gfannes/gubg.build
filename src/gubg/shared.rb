@@ -110,23 +110,24 @@ module GUBG
 
     #The passed block allows you to change the destination filename
     def self.publish(src, na = {pattern: nil, dst: nil, mode: nil}, &block)
-      dst = na[:dst] || shared_dir()
-      dst = shared_dir(dst) unless Pathname.new(dst).absolute?
+        dst_dir = na[:dst] || shared_dir()
+        dst_dir = shared_dir(dst_dir) unless Pathname.new(dst_dir).absolute?
+        FileUtils.mkdir_p(dst_dir) unless File.exist?(dst_dir)
         if File.directory?(src)
             patterns = [na[:pattern] || '*'].flatten
             Dir.chdir(src) do
                 patterns.each do |pattern|
                     FileList.new(pattern).each do |fn|
-                        dst_fn = File.join(dst, fn)
+                        dst_fn = File.join(dst_dir, fn)
                         new_fn = (block_given? ? block.call(dst_fn) : dst_fn)
                         if File.directory?(fn)
                             # puts("\"#{fn}\" is a directory, I will not publish this.") unless File.exist?(dst_fn)
                         else
-                            dst_dir = File.dirname(dst_fn)
-                            FileUtils.mkdir_p(dst_dir) unless File.exist?(dst_dir)
+                            my_dst_dir = File.dirname(dst_fn)
+                            FileUtils.mkdir_p(my_dst_dir) unless File.exist?(my_dst_dir)
                             if (!File.exist?(new_fn) or !FileUtils.identical?(fn, new_fn))
                                 puts("Installing \"#{fn}\" to \"#{new_fn}\"")
-                                FileUtils.install(fn, dst_dir, mode: na[:mode])
+                                FileUtils.install(fn, my_dst_dir, mode: na[:mode])
                                 FileUtils.mv(dst_fn, new_fn) if (dst_fn != new_fn)
                             end
                         end
@@ -134,13 +135,13 @@ module GUBG
                 end
             end
         else
-            dst_fn = File.join(dst, src)
+            dst_fn = File.join(dst_dir, src)
             new_fn = (block_given? ? block.call(dst_fn) : dst_fn)
-            dst_dir = File.dirname(dst_fn)
-            FileUtils.mkdir_p(dst_dir) unless File.exist?(dst_dir)
+            my_dst_dir = File.dirname(dst_fn)
+            FileUtils.mkdir_p(my_dst_dir) unless File.exist?(my_dst_dir)
             if (!File.exist?(new_fn) or !FileUtils.identical?(src, new_fn))
                 puts("Installing \"#{src}\" to \"#{new_fn}\"")
-                FileUtils.install(src, dst_dir, mode: na[:mode])
+                FileUtils.install(src, my_dst_dir, mode: na[:mode])
                 FileUtils.mv(dst_fn, new_fn) if (dst_fn != new_fn)
             end
         end
