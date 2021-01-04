@@ -118,31 +118,34 @@ module GUBG
             Dir.chdir(src) do
                 patterns.each do |pattern|
                     FileList.new(pattern).each do |fn|
-                        dst_fn = File.join(dst_dir, fn)
-                        new_fn = (block_given? ? block.call(dst_fn) : dst_fn)
+                        my_dst_fn = File.join(dst_dir, fn)
+                        new_fn = (block_given? ? block.call(my_dst_fn) : my_dst_fn)
                         if File.directory?(fn)
-                            # puts("\"#{fn}\" is a directory, I will not publish this.") unless File.exist?(dst_fn)
+                            # puts("\"#{fn}\" is a directory, I will not publish this.") unless File.exist?(my_dst_fn)
                         else
-                            my_dst_dir = File.dirname(dst_fn)
+                            my_dst_dir = File.dirname(my_dst_fn)
                             FileUtils.mkdir_p(my_dst_dir) unless File.exist?(my_dst_dir)
                             if (!File.exist?(new_fn) or !FileUtils.identical?(fn, new_fn))
                                 puts("Installing \"#{fn}\" to \"#{new_fn}\"")
                                 FileUtils.install(fn, my_dst_dir, mode: na[:mode])
-                                FileUtils.mv(dst_fn, new_fn) if (dst_fn != new_fn)
+                                FileUtils.mv(my_dst_fn, new_fn) if (my_dst_fn != new_fn)
                             end
                         end
                     end
                 end
             end
         else
-            dst_fn = File.join(dst_dir, src)
-            new_fn = (block_given? ? block.call(dst_fn) : dst_fn)
-            my_dst_dir = File.dirname(dst_fn)
+            #TODO: rework this part, removing use of FileUtils.install since that requires the hocuspocus wrt dst and new fn and, resulting in the my_dst_fn not being cleaned etc.
+            my_dst_fn = File.join(dst_dir, src)
+            my_dst_dir = File.dirname(my_dst_fn)
             FileUtils.mkdir_p(my_dst_dir) unless File.exist?(my_dst_dir)
+            new_fn = (block_given? ? block.call(my_dst_fn) : my_dst_fn)
+            new_dir = File.dirname(new_fn)
+            FileUtils.mkdir_p(new_dir) unless File.exist?(new_dir)
             if (!File.exist?(new_fn) or !FileUtils.identical?(src, new_fn))
                 puts("Installing \"#{src}\" to \"#{new_fn}\"")
                 FileUtils.install(src, my_dst_dir, mode: na[:mode])
-                FileUtils.mv(dst_fn, new_fn) if (dst_fn != new_fn)
+                FileUtils.mv(my_dst_fn, new_fn) if (my_dst_fn != new_fn)
             end
         end
     end
