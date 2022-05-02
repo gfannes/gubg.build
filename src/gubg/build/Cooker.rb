@@ -74,6 +74,11 @@ module GUBG
                 Rake::sh "ninja#{f_str}#{v_str}#{j_str}"
                 self
             end
+            def exe_fns()
+                @recipes.map do |rcp|
+                    output_fn(rcp.split('/').select{|e|!e.empty?()}*'.')
+                end
+            end
             def run(*args)
                 @recipes.each do |rcp|
                     exe_fn = output_fn(rcp.gsub(/^\//, "").gsub("/", "."))

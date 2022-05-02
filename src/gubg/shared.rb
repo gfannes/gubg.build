@@ -31,7 +31,10 @@ module GUBG
     end
 
     def self.home(*parts)
-        File.join(ENV['HOME'], *parts.compact)
+        my_home_dir = case GUBG.os()
+        when :windows then "#{ENV['HOMEDRIVE']}#{ENV['HOMEPATH']}"
+        else ENV["HOME"] end
+        File.join(my_home_dir, *parts.compact)
     end
     def self.home_file(*parts)
         fn = self.home(*parts)
@@ -42,6 +45,9 @@ module GUBG
         dir = self.home(*parts)
         FileUtils.mkdir_p(dir) unless File.exist?(dir)
         dir
+    end
+    def home_dir(*parts)
+        GUBG::home_dir(*parts)
     end
 
     def self.mkdir(*parts)
@@ -55,10 +61,8 @@ module GUBG
 
     class MissingSubmoduleError < StandardError
     end
-    def self.each_submod(na = {submods: nil}, &block)
+    def self.each_submod(submods: nil, &block)
         require("gubg/naft/Parser")
-
-        submods = na[:submods]
 
         infos = []
         info = nil
@@ -109,13 +113,14 @@ module GUBG
     end
 
     #The passed block allows you to change the destination filename
-    def self.publish(src, na = {pattern: nil, dst: nil, mode: nil}, &block)
-        dst_dir = na[:dst] || shared_dir()
+    def self.publish(*src, pattern: nil, dst: nil, mode: nil, &block)
+        dst_dir = dst || shared_dir()
         dst_dir = shared_dir(dst_dir) unless Pathname.new(dst_dir).absolute?
         FileUtils.mkdir_p(dst_dir) unless File.exist?(dst_dir)
-        if File.directory?(src)
-            patterns = [na[:pattern] || '*'].flatten
-            Dir.chdir(src) do
+        src_dir = File.join(*src)
+        if File.directory?(src_dir)
+            patterns = [pattern || '*'].flatten
+            Dir.chdir(src_dir) do
                 patterns.each do |pattern|
                     FileList.new(pattern).each do |fn|
                         my_dst_fn = File.join(dst_dir, fn)
@@ -127,7 +132,7 @@ module GUBG
                             FileUtils.mkdir_p(my_dst_dir) unless File.exist?(my_dst_dir)
                             if (!File.exist?(new_fn) or !FileUtils.identical?(fn, new_fn))
                                 puts("Installing \"#{fn}\" to \"#{new_fn}\"")
-                                FileUtils.install(fn, my_dst_dir, mode: na[:mode])
+                                FileUtils.install(fn, my_dst_dir, mode: mode)
                                 FileUtils.mv(my_dst_fn, new_fn) if (my_dst_fn != new_fn)
                             end
                         end
@@ -136,21 +141,21 @@ module GUBG
             end
         else
             #TODO: rework this part, removing use of FileUtils.install since that requires the hocuspocus wrt dst and new fn and, resulting in the my_dst_fn not being cleaned etc.
-            my_dst_fn = File.join(dst_dir, src)
+            my_dst_fn = File.join(dst_dir, src_dir)
             my_dst_dir = File.dirname(my_dst_fn)
             FileUtils.mkdir_p(my_dst_dir) unless File.exist?(my_dst_dir)
             new_fn = (block_given? ? block.call(my_dst_fn) : my_dst_fn)
             new_dir = File.dirname(new_fn)
             FileUtils.mkdir_p(new_dir) unless File.exist?(new_dir)
-            if (!File.exist?(new_fn) or !FileUtils.identical?(src, new_fn))
-                puts("Installing \"#{src}\" to \"#{new_fn}\"")
-                FileUtils.install(src, my_dst_dir, mode: na[:mode])
+            if (!File.exist?(new_fn) or !FileUtils.identical?(src_dir, new_fn))
+                puts("Installing \"#{src_dir}\" to \"#{new_fn}\"")
+                FileUtils.install(src_dir, my_dst_dir, mode: mode)
                 FileUtils.mv(my_dst_fn, new_fn) if (my_dst_fn != new_fn)
             end
         end
     end
-    def publish(src, na = {}, &block)
-        GUBG::publish(src, na, &block)
+    def publish(*src, **kwargs, &block)
+        GUBG::publish(*src, **kwargs, &block)
     end
 
     def self.link_unless_exists(old, new)
@@ -198,7 +203,7 @@ module GUBG
         GUBG::which(program, &block)
     end
 
-    def self.sandbox(na = {chdir: nil}, &block)
+    def self.sandbox(chdir: nil, &block)
         base = case os
                when :linux, :macos then "/tmp/gubg/sandbox"
                when :windows then "C:\\temp\\gubg\\sandbox"
@@ -212,7 +217,7 @@ module GUBG
             ix += 1
         end
 
-        chdir = na[:chdir]||false
+        chdir = chdir||false
         GUBG::mkdir(dir)
         if chdir
             Dir.chdir(dir) do
@@ -224,7 +229,7 @@ module GUBG
         puts "Removing #{dir}"
         FileUtils.rm_rf(dir)
     end
-    def sandbox(na = {chdir: nil}, &block)
-        GUBG::sandbox(na, &block)
+    def sandbox(chdir: nil, &block)
+        GUBG::sandbox(chdir: chdir, &block)
     end
 end
