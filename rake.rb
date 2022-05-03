@@ -1,5 +1,5 @@
 task :default do
-	sh "rake -f rake.rb -T"
+	sh "rake -T"
 end
 
 {
