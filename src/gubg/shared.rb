@@ -59,6 +59,14 @@ module GUBG
         GUBG::mkdir(*parts)
     end
 
+    def self.chdir(*parts, &block)
+        dir = File.join(*parts.compact.map{|e|e.to_s})
+        Dir.chdir(dir, &block)
+    end
+    def chdir(*parts, &block)
+        GUBG::chdir(*parts, &block)
+    end
+
     class MissingSubmoduleError < StandardError
     end
     def self.each_submod(submods: nil, &block)
