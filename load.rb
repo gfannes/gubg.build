@@ -2,11 +2,8 @@ require("rake")
 
 here_dir = File.dirname(__FILE__)
 
-gubg_dir = ENV["gubg"]
-if !gubg_dir || !File.exist?(gubg_dir)
-	gubg_dir = File.dirname(here_dir)
-	ENV["gubg"] = gubg_dir
-end
+gubg_dir = File.dirname(here_dir)
+ENV["gubg"] = gubg_dir
 
 $gubg__dir = nil
 Dir.chdir(gubg_dir) do
