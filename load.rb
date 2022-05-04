@@ -22,7 +22,9 @@ if running_from_rake
 	$gubg__dir.each do |_, dir|
 		fp = File.join(dir, "rake")
 		begin
-			require_relative(fp)
+			namespace :gubg do
+				require_relative(fp)
+			end
 		rescue LoadError
 			puts("Warning: failed to load `#{fp}`")
 		end

@@ -1,7 +1,3 @@
-task :default do
-	sh "rake -T"
-end
-
 {
 	clean: "Clean the module's temporary data",
 	prepare: "Prepare working with the modules",
