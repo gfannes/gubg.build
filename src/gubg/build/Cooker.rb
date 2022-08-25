@@ -46,32 +46,40 @@ module GUBG
             end
 
             def generate(generator, *recipes)
-                recipes.each{|rcp|recipe(rcp)}
+                @ninja_build = nil
+                if !recipes.empty?()
+                    recipes.each{|rcp|recipe(rcp)}
 
-                cmd = "cook -g #{generator}"
-                @toolchains.each do |str_or_fn|
-                    cmd << " -t #{str_or_fn}"
-                end
-                tmpdir = [".cook"]
-                @options.each do |opt|
-                    ary = [:key, :value].map{|sym|opt[sym]}.compact
-                    cmd << " -T #{ary*"="}"
-                    tmpdir += ary
-                end
-                cmd << " -O #{tmpdir*"/"}"
-                cmd << " -o #{@output_dir}" if @output_dir
-                @recipes_fns.each do |fn|
-                    cmd << " -f #{fn}"
-                end
-                @recipes.each{|rcp|cmd << " #{rcp}"}
-                Rake::sh cmd
+                    case generator
+                    when :ninja then @ninja_build = output_fn("build.ninja")
+                    end
+                    cmd = "cook -g #{generator}"
+                    @toolchains.each do |str_or_fn|
+                        cmd << " -t #{str_or_fn}"
+                    end
+                    tmpdir = [".cook"]
+                    @options.each do |opt|
+                        ary = [:key, :value].map{|sym|opt[sym]}.compact
+                        cmd << " -T #{ary*"="}"
+                        tmpdir += ary
+                    end
+                    cmd << " -O #{tmpdir*"/"}"
+                    cmd << " -o #{@output_dir}" if @output_dir
+                    @recipes_fns.each do |fn|
+                        cmd << " -f #{fn}"
+                    end
+                    @recipes.each{|rcp|cmd << " #{rcp}"}
+                    Rake::sh cmd
+                    end
                 self
             end
             def ninja(j = nil)
-                f_str = " -f #{output_fn("build.ninja")}"
-                v_str = " -v"
-                j_str = (j ? " -j #{j}" : "")
-                Rake::sh "ninja#{f_str}#{v_str}#{j_str}"
+                if @build_ninja
+                    f_str = " -f #{@build_ninja}"
+                    v_str = " -v"
+                    j_str = (j ? " -j #{j}" : "")
+                    Rake::sh "ninja#{f_str}#{v_str}#{j_str}"
+                end
                 self
             end
             def exe_fns()
