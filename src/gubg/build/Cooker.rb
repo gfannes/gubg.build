@@ -46,12 +46,12 @@ module GUBG
             end
 
             def generate(generator, *recipes)
-                @ninja_build = nil
+                @build_ninja = nil
                 if !recipes.empty?()
                     recipes.each{|rcp|recipe(rcp)}
 
                     case generator
-                    when :ninja then @ninja_build = output_fn("build.ninja")
+                    when :ninja then @build_ninja = output_fn("build.ninja")
                     end
                     cmd = "cook -g #{generator}"
                     @toolchains.each do |str_or_fn|
@@ -74,6 +74,7 @@ module GUBG
                 self
             end
             def ninja(j = nil)
+                raise("No ninja file was generated, did you call generate()?") unless @build_ninja
                 if @build_ninja
                     f_str = " -f #{@build_ninja}"
                     v_str = " -v"
