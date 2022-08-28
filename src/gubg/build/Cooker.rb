@@ -70,7 +70,7 @@ module GUBG
                     end
                     @recipes.each{|rcp|cmd << " #{rcp}"}
                     Rake::sh cmd
-                    end
+                end
                 self
             end
             def ninja(j = nil)
@@ -80,6 +80,15 @@ module GUBG
                     v_str = " -v"
                     j_str = (j ? " -j #{j}" : "")
                     Rake::sh "ninja#{f_str}#{v_str}#{j_str}"
+                end
+                self
+            end
+            def ninja_compdb(output_fp = "compile_commands.json")
+                raise("No ninja file was generated, did you call generate()?") unless @build_ninja
+                if @build_ninja
+                    f_str = " -f #{@build_ninja}"
+                    v_str = " -v"
+                    Rake::sh "ninja#{f_str}#{v_str} -t compdb > #{output_fp}"
                 end
                 self
             end
