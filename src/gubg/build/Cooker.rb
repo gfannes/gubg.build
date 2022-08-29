@@ -74,8 +74,9 @@ module GUBG
                 self
             end
             def ninja(j = nil)
-                raise("No ninja file was generated, did you call generate()?") unless @build_ninja
-                if @build_ninja
+                if !@build_ninja
+                    puts("Warning: No ninja file was generated, did you call generate()?")
+                else
                     f_str = " -f #{@build_ninja}"
                     v_str = " -v"
                     j_str = (j ? " -j #{j}" : "")
