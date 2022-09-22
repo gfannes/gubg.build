@@ -38,7 +38,8 @@ module GUBG
     end
     def self.home_file(*parts)
         fn = self.home(*parts)
-        raise("File \"#{fn}\" does not exist") unless File.exist?(fn)
+        dir = File.dirname(fn)
+        FileUtils.mkdir_p(dir) unless File.exist?(dir)
         fn
     end
     def self.home_dir(*parts)
