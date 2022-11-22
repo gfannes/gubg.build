@@ -1,4 +1,4 @@
-module GUBG
+module Gubg
     module Build
         class Cooker
             def initialize()
