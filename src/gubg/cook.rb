@@ -1,6 +1,6 @@
 require "gubg/cook/instance"
 
-module GUBG
+module Gubg
     module Cook
 
         @@instances = nil

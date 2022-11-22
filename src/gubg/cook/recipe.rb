@@ -1,4 +1,4 @@
-module GUBG
+module Gubg
     module Cook
         class Recipe
         

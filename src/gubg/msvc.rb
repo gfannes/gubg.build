@@ -1,6 +1,6 @@
 require("mkmf")
 
-module GUBG
+module Gubg
     module MSVC
         def self.load_compiler(arch)
             msvc, msvc_version = nil

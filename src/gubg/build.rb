@@ -1,6 +1,6 @@
 require 'pathname'
 
-module GUBG
+module Gubg
     module Build
         @@root_dir = nil
         def self.root_dir(fn = nil)

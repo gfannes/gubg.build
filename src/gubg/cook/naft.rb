@@ -2,7 +2,7 @@ require 'gubg/cook/recipe'
 
 require 'gubg/naft/Parser'
 
-module GUBG
+module Gubg
     module Cook
         class Naft
             attr_reader :recipes
@@ -13,7 +13,7 @@ module GUBG
                 stack = []
                 recipe = nil
 
-                p = GUBG::Naft::Parser.new(
+                p = Gubg::Naft::Parser.new(
                     node: ->(tag) { 
                         stack.push(tag)
                         attributes = {}
@@ -22,7 +22,7 @@ module GUBG
                         case stack.last
                         when "recipe"
                             attributes[:type] = (attributes[:type] || :Undefined).to_sym
-                            recipe = GUBG::Cook::Recipe.new(attributes[:uri], attributes)
+                            recipe = Gubg::Cook::Recipe.new(attributes[:uri], attributes)
                         when "target"
                             attributes[:type] = (attributes[:type] || :Undefined).to_sym
                             recipe.target = attributes

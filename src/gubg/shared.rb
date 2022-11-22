@@ -2,14 +2,14 @@ require('fileutils')
 require('pathname')
 require('digest/md5')
 
-module GUBG
+module Gubg
     def self.shared(*parts)
         raise('ERROR: You have to specify the shared destination dir via the environment variable "gubg"') unless ENV.has_key?('gubg')
         File.join(ENV['gubg'], *parts.compact)
     end
-    #Makes sure we can "include GUBG" to call shared() directly
+    #Makes sure we can "include Gubg" to call shared() directly
     def shared(*parts)
-        GUBG::shared(*parts)
+        Gubg::shared(*parts)
     end
 
     def self.shared_file(*parts)
@@ -18,7 +18,7 @@ module GUBG
         fn
     end
     def shared_file(*parts)
-        GUBG::shared_file(*parts)
+        Gubg::shared_file(*parts)
     end
 
     def self.shared_dir(*parts)
@@ -27,11 +27,11 @@ module GUBG
         dir
     end
     def shared_dir(*parts)
-        GUBG::shared_dir(*parts)
+        Gubg::shared_dir(*parts)
     end
 
     def self.home(*parts)
-        my_home_dir = case GUBG.os()
+        my_home_dir = case Gubg.os()
         when :windows then "#{ENV['HOMEDRIVE']}#{ENV['HOMEPATH']}"
         else ENV["HOME"] end
         File.join(my_home_dir, *parts.compact)
@@ -48,7 +48,7 @@ module GUBG
         dir
     end
     def home_dir(*parts)
-        GUBG::home_dir(*parts)
+        Gubg::home_dir(*parts)
     end
 
     def self.mkdir(*parts)
@@ -57,7 +57,7 @@ module GUBG
         dir
     end
     def mkdir(*parts)
-        GUBG::mkdir(*parts)
+        Gubg::mkdir(*parts)
     end
 
     def self.chdir(*parts, &block)
@@ -65,7 +65,7 @@ module GUBG
         Dir.chdir(dir, &block)
     end
     def chdir(*parts, &block)
-        GUBG::chdir(*parts, &block)
+        Gubg::chdir(*parts, &block)
     end
 
     class MissingSubmoduleError < StandardError
@@ -75,7 +75,7 @@ module GUBG
 
         infos = []
         info = nil
-        p = GUBG::Naft::Parser.new(
+        p = Gubg::Naft::Parser.new(
             node: ->(tag){
                 name = tag[/submodule "(.+)"/, 1]
                 info = if (!submods || submods.include?(name))
@@ -111,14 +111,14 @@ module GUBG
         end
     end
     def each_submod(submods, &block)
-        GUBG::each_submod(submods, &block)
+        Gubg::each_submod(submods, &block)
     end
 
     def self.md5sum(fn)
         Digest::MD5.hexdigest(File.open(fn, 'rb'){|fi|fi.read})
     end
     def md5sum(fn)
-        GUBG::md5sum(fn)
+        Gubg::md5sum(fn)
     end
 
     #The passed block allows you to change the destination filename
@@ -164,7 +164,7 @@ module GUBG
         end
     end
     def publish(*src, **kwargs, &block)
-        GUBG::publish(*src, **kwargs, &block)
+        Gubg::publish(*src, **kwargs, &block)
     end
 
     def self.link_unless_exists(old, new)
@@ -174,7 +174,7 @@ module GUBG
         end
     end
     def link_unless_exists(old, new)
-        GUBG::link_unless_exists(old, new)
+        Gubg::link_unless_exists(old, new)
     end
 
     def self.git_clone(uri, name, &block)
@@ -184,7 +184,7 @@ module GUBG
         Dir.chdir(name) {yield} if block_given?
     end
     def git_clone(uri, name, &block)
-        GUBG::git_clone(uri, name, &block)
+        Gubg::git_clone(uri, name, &block)
     end
 
     def self.os()
@@ -195,7 +195,7 @@ module GUBG
         end
     end
     def os()
-        GUBG::os()
+        Gubg::os()
     end
 
     def self.which(program, &block)
@@ -209,7 +209,7 @@ module GUBG
         path
     end
     def which(program, &block)
-        GUBG::which(program, &block)
+        Gubg::which(program, &block)
     end
 
     def self.sandbox(chdir: nil, &block)
@@ -227,7 +227,7 @@ module GUBG
         end
 
         chdir = chdir||false
-        GUBG::mkdir(dir)
+        Gubg::mkdir(dir)
         if chdir
             Dir.chdir(dir) do
                 block.call(dir)
@@ -239,6 +239,6 @@ module GUBG
         FileUtils.rm_rf(dir)
     end
     def sandbox(chdir: nil, &block)
-        GUBG::sandbox(chdir: chdir, &block)
+        Gubg::sandbox(chdir: chdir, &block)
     end
 end

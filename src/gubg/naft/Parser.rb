@@ -1,4 +1,4 @@
-module GUBG
+module Gubg
     module Naft
         class Parser
             def initialize(event_points = {node: nil, attr: nil, attr_done: nil, text: nil, node_done: nil})

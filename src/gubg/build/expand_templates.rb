@@ -1,7 +1,7 @@
 require("gubg/naft/Parser")
 require("stringio")
 
-module GUBG
+module Gubg
     module Build
         def self.expand_templates(fn)
             items = []
@@ -78,5 +78,5 @@ puts 0
 puts 1
 puts 2
     #}
-    GUBG::Build::expand_templates(__FILE__)
+    Gubg::Build::expand_templates(__FILE__)
 end

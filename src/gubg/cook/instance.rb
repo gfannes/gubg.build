@@ -1,15 +1,15 @@
 require('gubg/cook/naft')
 require('gubg/build')
 
-module GUBG
+module Gubg
     module Cook
         class Instance
-            GUBG_TOOLCHAIN_PATH = File.join(GUBG::Build.root_dir(), "gubg.build", "src", "gubg", "toolchain")
+            GUBG_TOOLCHAIN_PATH = File.join(Gubg::Build.root_dir(), "gubg.build", "src", "gubg", "toolchain")
 
             attr_reader :build_dir, :toolchains
 
             def initialize(na = {})
-                @build_dir = File.join(GUBG::Build.root_dir, "build", options())
+                @build_dir = File.join(Gubg::Build.root_dir, "build", options())
                 @cook_executable = "cook"
                 @additional_recipes = []
 
@@ -76,7 +76,7 @@ module GUBG
 
                 res = []
                 res << @cook_executable
-                rcps = [GUBG::Build::root_dir("recipes.chai")] + @additional_recipes
+                rcps = [Gubg::Build::root_dir("recipes.chai")] + @additional_recipes
                 rcps.each { |r| res << "-f" << r }
                 @toolchains.each { |fn| res << "-t" << fn }
                 res << "-o" << build_dir()

@@ -1,4 +1,4 @@
-module GUBG
+module Gubg
     module Catch
         class Color
             def initialize()

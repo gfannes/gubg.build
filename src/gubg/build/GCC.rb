@@ -32,8 +32,8 @@ module Build
                 # @options << 'Wa,-mmcu=avr5'
                 @defines << 'ARDUINO=10610'
                 @defines << 'ARDUINO_ARCH_AVR'
-                @include_paths << GUBG::shared('extern/Arduino-master/hardware/arduino/avr/cores/arduino')
-                @include_paths << GUBG::shared('extern/Arduino-master/libraries/Servo/src')
+                @include_paths << Gubg::shared('extern/Arduino-master/hardware/arduino/avr/cores/arduino')
+                @include_paths << Gubg::shared('extern/Arduino-master/libraries/Servo/src')
 
                 variant = nil
                 case @arch
@@ -54,7 +54,7 @@ module Build
                     @libraries << 'm'
                     # @libraries << 'stdc++'
                 end
-                @include_paths << GUBG::shared("extern/Arduino-master/hardware/arduino/avr/variants/#{variant}")
+                @include_paths << Gubg::shared("extern/Arduino-master/hardware/arduino/avr/variants/#{variant}")
             else
             end
             @arch_settings_added_ = true
