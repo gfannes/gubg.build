@@ -47,12 +47,13 @@ module Gubg
 
             def generate(generator, *recipes)
                 @build_ninja = nil
-                if !recipes.empty?()
-                    recipes.each{|rcp|recipe(rcp)}
+                case generator
+                when :ninja then @build_ninja = output_fn("build.ninja")
+                end
 
-                    case generator
-                    when :ninja then @build_ninja = output_fn("build.ninja")
-                    end
+                recipes.each{|rcp|recipe(rcp)}
+
+                if :create_cmd
                     cmd = "cook -g #{generator}"
                     @toolchains.each do |str_or_fn|
                         cmd << " -t #{str_or_fn}"
@@ -69,8 +70,10 @@ module Gubg
                         cmd << " -f #{fn}"
                     end
                     @recipes.each{|rcp|cmd << " #{rcp}"}
-                    Rake::sh cmd
                 end
+
+                Rake::sh cmd
+
                 self
             end
             def ninja(j = nil)
