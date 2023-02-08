@@ -5,7 +5,12 @@ module Gubg
         def self.load_compiler(arch)
             msvc, msvc_version = nil
             begin
-                base = "c:/Program Files (x86)/Microsoft Visual Studio/2019/Community"
+                bases = {
+                    2019 => 'c:/Program Files (x86)/Microsoft Visual Studio/2019/Community',
+                    2022 => 'c:/Program Files/Microsoft Visual Studio/2022/Community',
+                }
+                base = bases.values().find{|b|File.exist?(b§)}
+                raise("Could not find a MSVC installation") unless base
                 msvc = {
                     base: base,
                     vc: "#{base}/VC",
