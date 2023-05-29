@@ -1,5 +1,6 @@
 module Gubg
     module Catch
+
         class Color
             def initialize()
                 @stack = [:white]
@@ -209,5 +210,6 @@ module Gubg
             puts("}")
             print color.pop
         end
+
     end
 end

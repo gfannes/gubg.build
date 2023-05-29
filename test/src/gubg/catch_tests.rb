@@ -18,3 +18,5 @@ test_case("aaa") do
 end
 test_case("bbb") do
 end
+
+Gubg::Catch.run()
