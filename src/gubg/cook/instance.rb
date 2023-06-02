@@ -16,9 +16,9 @@ module Gubg
                 @toolchains = []
                 toolchains = ["default", "gubg.chai"] + (na[:toolchains] || [])
                 toolchains.each do |t|
-                    if File.exists?(t)
+                    if File.exist?(t)
                         @toolchains << t
-                    elsif File.exists?(File.join(GUBG_TOOLCHAIN_PATH, t))
+                    elsif File.exist?(File.join(GUBG_TOOLCHAIN_PATH, t))
                         @toolchains << File.join(GUBG_TOOLCHAIN_PATH, t)
                     else
                         @toolchains << t

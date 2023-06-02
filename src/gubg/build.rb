@@ -16,7 +16,7 @@ module Gubg
         private
         def self.find_root_()
             Pathname.new(File.dirname(__FILE__)).descend do |p|
-                return p if (File.exists?(p + ".git"))
+                return p if (File.exist?(p + ".git"))
             end
             return nil
         end
