@@ -8,7 +8,7 @@
 	task(task_name) do |t, args|
 		case task_name
 		when :clean
-			%w[resp gnuplot ninja a wav log svg].each do |ext|
+			%w[resp gnuplot ninja a wav log svg supr].each do |ext|
 				files = FileList.new("*.#{ext}")
 				rm(files) unless files.empty?()
 			end
