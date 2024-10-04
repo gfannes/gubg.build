@@ -9,8 +9,11 @@
 		case task_name
 		when :clean
 			%w[resp gnuplot ninja a wav log svg supr].each do |ext|
-				files = FileList.new("*.#{ext}")
-				rm(files) unless files.empty?()
+				FileList.new("*.#{ext}").each do |fp|
+					rm(fp)
+				rescue
+					puts("Waring: could not delete '#{fp}'")
+				end
 			end
 		end
 
