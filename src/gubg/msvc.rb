@@ -6,8 +6,8 @@ module Gubg
             msvc, msvc_version = nil
             begin
                 bases = {
-                    2019 => 'c:/Program Files (x86)/Microsoft Visual Studio/2019/Community',
                     2022 => 'c:/Program Files/Microsoft Visual Studio/2022/Community',
+                    2019 => 'c:/Program Files (x86)/Microsoft Visual Studio/2019/Community',
                 }
                 base = bases.values().find{|b|File.exist?(b)}
                 raise("Could not find a MSVC installation") unless base
